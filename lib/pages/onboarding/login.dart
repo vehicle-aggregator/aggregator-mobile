@@ -1,8 +1,11 @@
+import 'package:aggregator_mobile/api/auth.dart';
+import 'package:aggregator_mobile/components/dialogs/alert.dart';
 import 'package:aggregator_mobile/models/user.dart';
 import 'package:aggregator_mobile/widgets/date_picker_widget.dart';
 import 'package:aggregator_mobile/widgets/forms/text_input_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 import '../../routes.dart';
 
@@ -17,11 +20,11 @@ class _LoginScreenState extends State<LoginScreen> {
   User _user;
   String passwordError;
   String emailError;
-  String loginError;
+  String lastnameError;
   String nameError;
   String surnameError;
 
-  //AuthModel _auth;
+  AuthModel _auth;
 
   TextEditingController _controllerEmail, _controllerPassword, _controllerConfirm;
 
@@ -36,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //_auth = Provider.of<AuthModel>(context);
+    _auth = Provider.of<AuthModel>(context);
 
     var mq = MediaQuery.of(context);
 
@@ -57,18 +60,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
                     child: Column(
                       children: <Widget>[
-                        ListTile(
-                          title: TextFieldWidget(
-                            key: Key('login'),
-                            labelText: "Логин",
-                            hintText: "Логин",
-                            onSaved: (val) => setState(() => this._user.login = val),
-                            obscureText: false,
-                            keyboardType: TextInputType.text,
-                            controller: _controllerEmail,
-                            error: loginError,
+                        if (!this.registration)
+                          ListTile(
+                            title: TextFieldWidget(
+                              key: Key('email'),
+                              labelText: "Логин",
+                              hintText: "Email",
+                              onSaved: (val) => setState(() => this._email = val),
+                              keyboardType: TextInputType.text,
+                              controller: _controllerEmail,
+                            ),
                           ),
-                        ),
                         if (!this.registration)
                           ListTile(
                             title: TextFieldWidget(
@@ -109,6 +111,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                   onSaved: (val) => setState(() => this._user.surname = val),
                                   keyboardType: TextInputType.text,
                                   error: this.surnameError,
+                                ),
+                              ),
+                              ListTile(
+                                title: TextFieldWidget(
+                                  key: Key('lastname'),
+                                  hintText: "Отчество",
+                                  onSaved: (val) => setState(() => this._user.lastname = val),
+                                  obscureText: false,
+                                  keyboardType: TextInputType.text,
+                                  error: this.lastnameError,
                                 ),
                               ),
                               ListTile(
@@ -272,7 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
         this._user.name != null &&
         this._user.surname != null &&
         this._user.gender != null &&
-        this._user.login != null &&
+        this._user.lastname != null &&
         this._controllerPassword.text != '' &&
         this._controllerConfirm.text != ''
         : this._controllerPassword.text != '' &&
@@ -280,11 +292,32 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future authorize() async {
-    if (registration)
-      if (!validate())
-        print("VALIDATION ERRORS OCCURED");
+    try{
+    if (!registration){
+      var result = await _auth.login(email: _email, password: _password, context: context);
+      if (result == null)
+        return;
+      //
+      // var hasPinCode = await _auth.hasPinCode();
+      //
+      // var route = hasPinCode
+      //     ? _auth.user.defaultLocation == null ? Routes.chooseLocation : Routes.home
+      //     : Routes.pinCode;
 
-    print(this.registration ? "TODO handle REGISTRATION" : "TODO handle LOGIN");
+      await Navigator.of(context).pushNamedAndRemoveUntil(Routes.pinCode, (route) => false);
+
+      return;
+    }
+    else{
+      if (!validate())
+        return;
+      print(this.registration ? "TODO handle REGISTRATION" : "TODO handle LOGIN");
+    }
+    } catch (e){
+      print(e);
+    }
+
+    await showAlertDialog(context, "Ошибка", "Что-то пошло не так");
   }
 
   bool validate(){
@@ -310,8 +343,8 @@ class _LoginScreenState extends State<LoginScreen> {
       surnameError = "Некорректная фамилия";
       result = false;
     }
-    if (!RegExp(r"[a-zA-Zа-яА-Я0-9]").hasMatch(_user.login)){
-      loginError = "Некорректный логин";
+    if (!RegExp(r"[a-zA-Zа-яА-Я]").hasMatch(_user.lastname)){
+      lastnameError = "Некорректный логин";
       result = false;
     }
     setState(() {});
@@ -324,7 +357,7 @@ class _LoginScreenState extends State<LoginScreen> {
       nameError = null;
       surnameError = null;
       emailError = null;
-      loginError = null;
+      lastnameError = null;
     });
   }
 }

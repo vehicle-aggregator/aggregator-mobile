@@ -1,6 +1,8 @@
 
 import 'package:aggregator_mobile/pages/onboarding/login.dart';
+import 'package:aggregator_mobile/pages/onboarding/pincode.dart';
 import 'package:aggregator_mobile/pages/onboarding/splash.dart';
+import 'package:aggregator_mobile/pages/private/home.dart';
 import 'package:flutter/material.dart';
 
 class Routes {
@@ -16,6 +18,8 @@ class Routes {
   static final routes = <String, WidgetBuilder>{
     splash: (BuildContext context) => SplashScreen(),
     login: (BuildContext context) => LoginScreen(),
+    pinCode: (BuildContext context) => PinCodeScreen(),
+    home: (BuildContext context) => Home()
   };
 
 }
