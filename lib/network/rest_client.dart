@@ -24,7 +24,9 @@ class RestClient {
   RestClient._internal() {
     _dio = new Dio();
 
-    _dio.options.baseUrl = Endpoints.localhost;
+    _dio.options.baseUrl =
+    //    Endpoints.server;
+    Endpoints.localhost;
     _dio.options.connectTimeout = 20000;
     _dio.options.receiveTimeout = 10000;
     _dio.transformer = FlutterTransformer();
@@ -75,6 +77,7 @@ class RestClient {
       final response = await _dio.post(url, data: fd);
       return response.data;
     } catch (e){
+      print('ERRRRRRROOOORRRR ==> $e');
     }
   }
 
@@ -159,7 +162,9 @@ class EnvironmentManager extends Interceptor {
     final instance = await SharedPreferences.getInstance();
     const KEY = "BASE_ENV";
     final baseUrl = instance.getString(KEY);
-    options.baseUrl = Endpoints.localhost;
+    options.baseUrl =
+    //    Endpoints.server;
+    Endpoints.localhost;
     print(options.baseUrl); //baseUrl != null ? baseUrl : Endpoints.live;
   }
 }

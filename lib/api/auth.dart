@@ -13,8 +13,14 @@ class AuthModel {
   RestClient _client = RestClient();
 
   Future<User> getUserProfile(int id) async {
-    var json = await _client.get("${Endpoints.me}?uid=$id");
-    return setUser(User.fromJson(json));
+    try {
+      var json = await _client.get("${Endpoints.me}?uid=$id");
+      return setUser(User.fromJson(json));
+    } catch (e) {
+      print(e);
+      logout();
+      return null;
+    }
   }
 
   Future<User> login({
@@ -25,6 +31,15 @@ class AuthModel {
     final body = {'email': email, 'password': password};
     final json = await _client.post(Endpoints.login, body);
     return setUser(User.fromJson(json));
+  }
+
+  Future<User> register(User user, String password) async {
+    final body = user.toJson(password: password);
+    print(body);
+    final json = await _client.post(Endpoints.register, body);
+    print(json);
+    
+    return await getUserProfile(json['Uid']);
   }
 
   Future<User> setUser(User user) async {

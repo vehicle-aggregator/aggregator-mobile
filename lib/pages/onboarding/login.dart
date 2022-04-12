@@ -293,6 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future authorize() async {
     try{
+      print(registration);
     if (!registration){
       var result = await _auth.login(email: _email, password: _password, context: context);
       if (result == null)
@@ -309,9 +310,11 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     else{
-      if (!validate())
-        return;
-      print(this.registration ? "TODO handle REGISTRATION" : "TODO handle LOGIN");
+      if (validate()){
+        var result = await _auth.register(_user, _controllerPassword.text);
+        await Navigator.of(context).pushNamedAndRemoveUntil(Routes.pinCode, (route) => false);
+      }
+
     }
     } catch (e){
       print(e);

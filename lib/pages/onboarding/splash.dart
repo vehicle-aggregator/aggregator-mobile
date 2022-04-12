@@ -31,15 +31,16 @@ class _SplashScreenState extends State<SplashScreen> {
       var i = await SharedPreferences.getInstance();
       int id = i.getInt("ID");
       print("id ======. > $id");
-      await auth.getUserProfile(id);
-      print(auth.user.name);
-      print(auth.user.surname);
-      print(auth.user.lastname);
+      //await Navigator.maybeOf(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);
 
-      var hasPinCode = await auth.hasPinCode();
-      String route = hasPinCode ? Routes.pinCode : Routes.login;
-
-      await Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);
+      if (id == null)
+        await Navigator.of(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);
+      else{
+        await auth.getUserProfile(id);
+        var hasPinCode = await auth.hasPinCode();
+        String route = hasPinCode ? Routes.pinCode : Routes.login;
+        await Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);
+      }
     });
   }
 

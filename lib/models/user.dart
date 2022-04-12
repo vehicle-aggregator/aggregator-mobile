@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class User{
   String name;
   String surname;
@@ -22,6 +24,19 @@ class User{
 
   User.fromToken(){
     //TODO
+  }
+
+  Map<String, dynamic> toJson({String password = ''}) {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['lastname'] = this.lastname;
+    data['name'] = this.name;
+    data['middlename'] = this.surname;
+    data['birthday'] = DateFormat("yyyy-MM-dd").format(this.birthDate);
+    data['coins'] = 0;
+    data['gender'] = this.gender;
+    data['email'] = this.email;
+    data['password'] = password;
+    return data;
   }
 
   User.fromJson(Map<String, dynamic> json){
