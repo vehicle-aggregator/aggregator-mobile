@@ -35,6 +35,7 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
             IconButton(
               icon: isFiltersOn ? Icon(Icons.clear) : Icon(Icons.search),
               onPressed: () => setState((){
+                _bloc.clearFilters();
                 isFiltersOn = !isFiltersOn;
               }),
             ),
@@ -61,19 +62,21 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
                                   final location = await showDialog(
                                       context: context,
                                       builder: (builderContext) => SearchLocationDialog(
-                                    items: ['Владимир', 'Москва', 'Санкт-Петербург'],)
+                                        items: snapshot.data.uiData.places
+                                      )
                                   );
                                   setState(() {
                                     from = location;
+                                    snapshot.data.uiData.filterData.from = location;
                                   });
                                 },
                                 child: Container(
                                   height: 48,
                                   padding: EdgeInsets.only(left: 15, right: 15),
                                   alignment: Alignment.centerLeft,
-                                  child: Text(from == null ? 'Откуда': from,
+                                  child: Text(snapshot.data.uiData?.filterData?.from == null ? 'Откуда': snapshot.data.uiData.filterData.from,
                                       style: TextStyle(
-                                          color: from == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
+                                          color: snapshot.data.uiData?.filterData?.from == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
                                           fontSize: 16
                                       )
                                   ),
@@ -90,6 +93,8 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
                                     String temp = to;
                                     to = from;
                                     from = temp;
+                                    snapshot.data.uiData.filterData.from = from;
+                                    snapshot.data.uiData.filterData.to = to;
                                     setState(() {});
                                 },
                               ),
@@ -100,18 +105,21 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
                                     final location = await showDialog(
                                         context: context,
                                         builder: (builderContext) => SearchLocationDialog(
-                                          items: ['Владимир', 'Москва', 'Санкт-Петербург'],
+                                          items: snapshot.data.uiData.places
                                         )
                                     );
-                                    setState(() => to = location);
+                                    setState(() {
+                                      to = location;
+                                      snapshot.data.uiData.filterData.to = location;
+                                    });
                                   },
                                   child: Container(
                                     height: 48,
                                     padding: EdgeInsets.only(left: 15, right: 15),
                                     alignment: Alignment.centerLeft,
-                                    child: Text(to == null ? 'Куда': to,
+                                    child: Text(snapshot.data.uiData?.filterData?.to == null ? 'Куда': snapshot.data.uiData.filterData.to,
                                         style: TextStyle(
-                                            color: to == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
+                                            color: snapshot.data.uiData?.filterData?.to == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
                                             fontSize: 16
                                         )
                                     ),
@@ -130,37 +138,55 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
                         child: Row(
                           children:[
                             Expanded(
+                              flex:1,
                               child: CustomDatePicker(
-                                value: date,
+                                value: snapshot.data.uiData?.filterData?.date,
                                 hint: "Дата",
-                                onChange: (value) => setState((){
+                                onChange: (value) {
+                                    setState((){
                                   date = value;
-                                }),
+                                  snapshot.data.uiData.filterData.date = date;
+                                });
+                                }
                               ),
                             ),
-                             SizedBox(width: 48,),
+                            SizedBox(width: 10,),
                             Expanded(
-                                child:OutlinedButton(
-                                  onPressed: () => print(123),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.search, color: Colors.white,),
-                                      SizedBox(width: 10,),
-                                      Text('Поиск', style: TextStyle(color: Colors.white, fontSize: 18),),
-                                    ],
-                                  ),
-
-                                  style: OutlinedButton.styleFrom(
-                                    minimumSize: Size(25, 48),
-                                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
-                                      backgroundColor: Color(0xFF988AAC)
+                              flex: 1,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    FocusManager.instance.primaryFocus.unfocus();
+                                    final company = await showDialog(
+                                        context: context,
+                                        builder: (builderContext) => SearchLocationDialog(
+                                            items: snapshot.data.uiData.companies
+                                        )
+                                    );
+                                    setState(() {
+                                      snapshot.data.uiData.filterData.company = company;
+                                    });
+                                  },
+                                  child: Container(
+                                    height: 48,
+                                    padding: EdgeInsets.only(left: 15, right: 15),
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(snapshot.data.uiData?.filterData?.company == null ? 'Компания': snapshot.data.uiData.filterData.company,
+                                        style: TextStyle(
+                                            color: snapshot.data.uiData?.filterData?.company == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
+                                            fontSize: 16
+                                        )
+                                    ),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Color(0xFFEDEBF0), width: 1),
+                                        borderRadius: BorderRadius.circular(40)
+                                    ),
                                   ),
                                 )
                             )
                           ]
                         ),
                       ),
+                      //Text('${snapshot.data.uiData?.filterData?.costStart ?? 'sss'} --- ${snapshot.data.uiData?.filterData?.costEnd ?? 'sss'} --- ${snapshot.data.uiData?.filterData?.to ?? 'sss'}'),
                       Divider(color:Color(0xFFEDEBF0), thickness: 2,)
                     ],
                   ),
@@ -206,7 +232,7 @@ class ItineraryListState extends State<ItineraryList>{
     if (!_isBottom)
       return;
     print('ON SCROLL');
-    widget._bloc.loadMore();
+    //widget._bloc.loadMore();
   }
 
   bool get _isBottom {
@@ -230,9 +256,15 @@ class ItineraryListState extends State<ItineraryList>{
     List<Itinerary> itineraries = state.uiData?.itineraryList ?? [];
 
     if (state.uiState == UiState.loading){
-      print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
       return Center(child: CircularProgressIndicator());
     }
+
+    itineraries = itineraries.where((element) =>
+      (state.uiData.filterData?.from == null || state.uiData.filterData.from == element.from) &&
+      (state.uiData.filterData?.to == null || state.uiData.filterData.to == element.to) &&
+      (state.uiData.filterData?.date == null || (state.uiData.filterData.date.day == element.date.day && state.uiData.filterData.date.month == element.date.month && state.uiData.filterData.date.year == element.date.year)) &&
+      (state.uiData.filterData?.company == null || element.transporter.contains(state.uiData.filterData.company))
+    ).toList();
 
     return RefreshIndicator(
         onRefresh: () async {
@@ -244,20 +276,21 @@ class ItineraryListState extends State<ItineraryList>{
         child: ListView.builder(
           physics: AlwaysScrollableScrollPhysics(),
           controller: _scrollController,
-          itemCount: widget._bloc.canLoadMore() ? itineraries.length + 1 : itineraries.length,
+          itemCount: //widget._bloc.canLoadMore() ? itineraries.length + 1 :
+          itineraries.length,
           itemBuilder: (context, index) {
-            if (index >= itineraries.length)
-              return Container(
-                alignment: Alignment.center,
-                child: Center(
-                  child: Container(
-                    margin: EdgeInsets.all(40),
-                    width: 33,
-                    height: 33,
-                    child: CircularProgressIndicator(strokeWidth: 1.5, color: Theme.of(context).primaryColor),
-                  ),
-                ),
-              );
+            // if (index >= itineraries.length)
+            //   return Container(
+            //     alignment: Alignment.center,
+            //     child: Center(
+            //       child: Container(
+            //         margin: EdgeInsets.all(40),
+            //         width: 33,
+            //         height: 33,
+            //         child: CircularProgressIndicator(strokeWidth: 1.5, color: Theme.of(context).primaryColor),
+            //       ),
+            //     ),
+            //   );
             final item = itineraries[index];
             return ItineraryItem(key: Key(index.toString()), item: item);
           },
@@ -283,32 +316,51 @@ class ItineraryItem extends StatelessWidget{
         child: Column(
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  flex: 5,
+                  child:Container(
+                    //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.from, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
+                        Text(getTime(item.departureTime), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                      //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+                      child: Icon(Icons.arrow_forward_rounded, color: Color(0xFFB4B9BF),)),
+                ),
+
+                Expanded(
+                    flex: 5,
+                    child: Container(
+                      //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(item.to, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
+                          Text(getTime(item.arrivalTime), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                        ],
+                      ),
+                    )
+                )
+
+              ],
+            ),
+            SizedBox(height: 10,),
+            Row(
               children: [
                 Flexible(
                   flex:5,
                   child: Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item.from, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
-                              Text(getTime(item.departureTime), style: TextStyle(color: Color(0xFFB4B9BF)),)
-                            ],
-                          ),
-                          Icon(Icons.arrow_forward_rounded, color: Color(0xFFB4B9BF),),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item.to, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
-                              Text(getTime(item.arrivalTime), style: TextStyle(color: Color(0xFFB4B9BF)),)
-                            ],
-                          )
-                        ],
-                      ),
-                      SizedBox(height: 10,),
                       Container(
                         width: double.infinity,
                         //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
@@ -342,6 +394,18 @@ class ItineraryItem extends StatelessWidget{
                             )
                           ],
                         ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.business_center, color: Color(0xFFB4B9BF)),
+                          Text('${item.transporter}', style: TextStyle(color: Color(0xFFB4B9BF)))
+                        ]
+                      ),
+                      Row(
+                          children: [
+                            Icon(Icons.people_alt_outlined, color: Color(0xFFB4B9BF),),
+                            Text('Свободных мест ${item.vacantQuantity}', style: TextStyle(color: Color(0xFFB4B9BF)))
+                          ]
                       )
                     ],
                   ),
@@ -372,11 +436,6 @@ class ItineraryItem extends StatelessWidget{
                 )
               ],
             ),
-            SizedBox(height: 10),
-            Container(
-              alignment: Alignment.centerLeft,
-              child: Text('${item.transporter}, Свободных мест ${item.vacantQuantity}', style: TextStyle(color: Color(0xFFB4B9BF)),)
-            )
 
           ],
         )

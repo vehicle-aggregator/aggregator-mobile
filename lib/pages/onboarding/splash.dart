@@ -33,14 +33,20 @@ class _SplashScreenState extends State<SplashScreen> {
       print("id ======. > $id");
       //await Navigator.maybeOf(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);
 
-      if (id == null)
+      try{
+        if (id == null)
+          await Navigator.of(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);
+        else{
+          await auth.getUserProfile(id);
+          var hasPinCode = await auth.hasPinCode();
+          String route = hasPinCode ? Routes.pinCode : Routes.login;
+          await Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);
+        }
+      } catch(e){
+        print(e);
         await Navigator.of(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);
-      else{
-        await auth.getUserProfile(id);
-        var hasPinCode = await auth.hasPinCode();
-        String route = hasPinCode ? Routes.pinCode : Routes.login;
-        await Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);
       }
+
     });
   }
 

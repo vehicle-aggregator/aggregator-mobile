@@ -25,8 +25,8 @@ class RestClient {
     _dio = new Dio();
 
     _dio.options.baseUrl =
-    //    Endpoints.server;
-    Endpoints.localhost;
+        Endpoints.server;
+    //Endpoints.localhost;
     _dio.options.connectTimeout = 20000;
     _dio.options.receiveTimeout = 10000;
     _dio.transformer = FlutterTransformer();
@@ -163,8 +163,8 @@ class EnvironmentManager extends Interceptor {
     const KEY = "BASE_ENV";
     final baseUrl = instance.getString(KEY);
     options.baseUrl =
-    //    Endpoints.server;
-    Endpoints.localhost;
+        Endpoints.server;
+    //Endpoints.localhost;
     print(options.baseUrl); //baseUrl != null ? baseUrl : Endpoints.live;
   }
 }

@@ -1,11 +1,15 @@
+import 'package:aggregator_mobile/api/itinerary_client.dart';
 import 'package:aggregator_mobile/models/itinerary.dart';
 import 'dart:async';
 import 'bloc.dart';
 
 class UiData {
-  List<Itinerary> itineraryList;
+  List<Itinerary> itineraryList = [];
+  List<String> places = [];
+  List<String> companies = [];
+  ItineraryFilter filterData = ItineraryFilter();
 
-  UiData(this.itineraryList);
+  UiData({this.itineraryList, this.places, this.companies, this.filterData});
 }
 
 class ItineraryListUiState {
@@ -32,11 +36,12 @@ class ItineraryListBloc implements Bloc {
 
   var _offset = 0;
   var _total = 100;
-  final _count = 20;
+  final _count = 30;
 
-  bool _loading = false;
   bool refresh = false;
   bool checkCloseTimer = false;
+
+  ItineraryClient _client = ItineraryClient();
 
 
   @override
@@ -45,11 +50,20 @@ class ItineraryListBloc implements Bloc {
 
   void init() async {
     _controller.sink.add(ItineraryListUiState.loading());
+
+    List<String> locations = await _client.fetchLocations();
+    List<String> companies = await _client.fetchCompanies();
+
     await Future.delayed(Duration(seconds: 2),(){
       for(int i = 0; i<_count; i++){
         _itineraries.add(Itinerary.test());
       }
-      _uiData = UiData(_itineraries);
+      _uiData = UiData(
+          itineraryList: _itineraries,
+          places: locations,
+          companies: companies,
+          filterData: ItineraryFilter()
+      );
     });
 
     _controller.sink.add(ItineraryListUiState.normal(_uiData));
@@ -58,16 +72,28 @@ class ItineraryListBloc implements Bloc {
   Future query() async {
     if (_itineraries.isEmpty)
       _controller.sink.add(ItineraryListUiState.loading());
+
+    List<String> companies = await _client.fetchCompanies();
+    List<String> locations = await _client.fetchLocations();
+
     await Future.delayed(Duration(seconds: 2),(){
       for(int i = 0; i<_count; i++){
         _itineraries.add(Itinerary.test());
       }
-      _uiData = UiData(_itineraries);
+      _uiData = UiData(
+          itineraryList: _itineraries,
+          places: locations,
+          companies: companies,
+          filterData: _uiData.filterData
+      );
     });
 
     _controller.sink.add(ItineraryListUiState.normal(_uiData));
   }
 
+  clearFilters(){
+    _uiData.filterData = ItineraryFilter();
+  }
 
   bool canLoadMore() {
     print('OFFSET => $_offset');
@@ -88,4 +114,15 @@ class ItineraryListBloc implements Bloc {
     _itineraries = [];
     await query();
   }
+
+}
+
+class ItineraryFilter {
+  String from;
+  String to;
+  DateTime date;
+  String company;
+
+
+  ItineraryFilter({this.to, this.from, this.date, this.company});
 }
