@@ -10,6 +10,6 @@ class Endpoints {
   static const String me = "casual/get_account";
   static const String register = "casual/create";
   static const String places = "place";
-  static const String routes = "route";
+  static const String itineraries = "trip";
   static const String companies = "company";
 }

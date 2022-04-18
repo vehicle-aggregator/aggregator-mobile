@@ -1,23 +1,24 @@
 import 'dart:math';
 
 class Itinerary{
+
+  DateTime start;
+  DateTime finish;
+  DateTime date;
   String from;
   String to;
   String transporter;
-  int departureTime;
-  int arrivalTime;
   double price;
   int quantity;
-  DateTime date;
   int vacantQuantity;
 
-  Itinerary({this.arrivalTime, this.date, this.departureTime, this.from, this.price, this.quantity, this.to, this.transporter, this.vacantQuantity});
+  Itinerary({this.start, this.finish, this.date, this.from, this.price, this.quantity, this.to, this.transporter, this.vacantQuantity});
 
   Itinerary.test(){
     int randomNumber = Random().nextInt(3) + 1;
 
-    this.arrivalTime = 10000000;
-    this.departureTime = 76400000;
+    //this.arrivalTime = 10000000;
+    //this.departureTime = 76400000;
 
 
     switch (randomNumber){
@@ -63,10 +64,18 @@ class Itinerary{
     var random = Random().nextInt(1900) + 100;
     this.price = random.toDouble();
     this.vacantQuantity = 11;
-    this.date = DateTime.now().add(Duration(days: Random().nextInt(4)));
+    //this.date = DateTime.now().add(Duration(days: Random().nextInt(4)));
   }
 
   Itinerary.fromJson(Map<String, dynamic> json){
-    //this.from = json['']
+    print(json);
+    this.from = json['PlaceFrom'];
+    this.to = json['PlaceTo'];
+    this.transporter = json['CompanyName'];
+    this.price = (json['Price'] as int).toDouble();
+    this.vacantQuantity = json['PassengerCount'] - json['TicketBought'];
+    this.start = DateTime.parse(json['StartAt']);
+    this.finish = DateTime.parse(json['EndAt']);
+    this.date = DateTime.parse(json['StartAt']);
   }
 }

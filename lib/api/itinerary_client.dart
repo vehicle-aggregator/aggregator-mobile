@@ -21,8 +21,10 @@ class ItineraryClient {
   }
 
 
-  fetchItineraries() async {
-    dynamic json = await _client.get(Endpoints.routes);
-    var a = json.map((e) => Itinerary.fromJson(e));
+  Future<List<Itinerary>> fetchItineraries() async {
+    dynamic json = await _client.get(Endpoints.itineraries);
+    List<Itinerary> a = [];
+    json.forEach((e) => a.add(Itinerary.fromJson(e)));
+    return a;
   }
 }

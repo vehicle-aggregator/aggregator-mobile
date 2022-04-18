@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:aggregator_mobile/models/navigation_bar_item_value.dart';
 import 'package:aggregator_mobile/routes.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +11,17 @@ import 'api/auth.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+  }
+}
+
 void main() async {
 
+  HttpOverrides.global = MyHttpOverrides();
   //debugPaintSizeEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);

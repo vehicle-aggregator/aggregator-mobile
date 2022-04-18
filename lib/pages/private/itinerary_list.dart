@@ -29,6 +29,14 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Icon(Icons.refresh, color: Colors.white,),
+        onPressed: () async {
+          _bloc.refresh = true;
+          await _bloc.reload();
+        },
+      ),
       appBar: AppBar(
         title: Text('Маршруты'),
         actions: [
@@ -256,7 +264,7 @@ class ItineraryListState extends State<ItineraryList>{
     List<Itinerary> itineraries = state.uiData?.itineraryList ?? [];
 
     if (state.uiState == UiState.loading){
-      return Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
 
     itineraries = itineraries.where((element) =>
@@ -277,20 +285,12 @@ class ItineraryListState extends State<ItineraryList>{
           physics: AlwaysScrollableScrollPhysics(),
           controller: _scrollController,
           itemCount: //widget._bloc.canLoadMore() ? itineraries.length + 1 :
-          itineraries.length,
+          itineraries.length + 1,
           itemBuilder: (context, index) {
-            // if (index >= itineraries.length)
-            //   return Container(
-            //     alignment: Alignment.center,
-            //     child: Center(
-            //       child: Container(
-            //         margin: EdgeInsets.all(40),
-            //         width: 33,
-            //         height: 33,
-            //         child: CircularProgressIndicator(strokeWidth: 1.5, color: Theme.of(context).primaryColor),
-            //       ),
-            //     ),
-            //   );
+            if (index >= itineraries.length)
+              return Container(
+                height: 75,
+              );
             final item = itineraries[index];
             return ItineraryItem(key: Key(index.toString()), item: item);
           },
@@ -326,7 +326,7 @@ class ItineraryItem extends StatelessWidget{
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(item.from, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
-                        Text(getTime(item.departureTime), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                        Text(getTime(item.start), style: TextStyle(color: Color(0xFFB4B9BF)),)
                       ],
                     ),
                   ),
@@ -346,7 +346,7 @@ class ItineraryItem extends StatelessWidget{
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(item.to, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
-                          Text(getTime(item.arrivalTime), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                          Text(getTime(item.finish), style: TextStyle(color: Color(0xFFB4B9BF)),)
                         ],
                       ),
                     )
@@ -384,9 +384,7 @@ class ItineraryItem extends StatelessWidget{
                                 children: [
                                   Icon(Icons.timelapse, color: Color(0xFFB4B9BF),),
                                   Text(
-                                    item.arrivalTime > item.departureTime
-                                        ? getDuration(item.arrivalTime - item.departureTime)
-                                        : getDuration(86400000 - item.departureTime + item.arrivalTime),
+                                    getDuration(item.start.difference(item.finish).inMinutes.abs()),
                                     style: TextStyle(color: Color(0xFFB4B9BF)),
                                   )
                                 ],
@@ -442,13 +440,13 @@ class ItineraryItem extends StatelessWidget{
     );
   }
 
-  String getTime(int ms){
-    DateTime d = DateTime(1, 1, 1, ms ~/ 1000 ~/ 60 ~/ 60, ms ~/ 1000 ~/ 60 % 60);
-    return (DateFormat('HH:mm').format(d));
+  String getTime(DateTime date){
+    print('CHEEEEEECK ${date}');
+    return (DateFormat('HH:mm').format(date));
   }
 
-  String getDuration(int ms){
-    DateTime d = DateTime(1, 1, 1, ms ~/ 1000 ~/ 60 ~/ 60, ms ~/ 1000 ~/ 60 % 60);
-    return '${d.hour} ч ${d.minute} м';
+  String getDuration(int minutes){
+    print('CHEEEEEECK222222 ${minutes}');
+    return '${minutes ~/ 60} ч ${minutes % 60} м';
   }
 }

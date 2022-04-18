@@ -53,18 +53,15 @@ class ItineraryListBloc implements Bloc {
 
     List<String> locations = await _client.fetchLocations();
     List<String> companies = await _client.fetchCompanies();
+    _itineraries = await _client.fetchItineraries();
 
-    await Future.delayed(Duration(seconds: 2),(){
-      for(int i = 0; i<_count; i++){
-        _itineraries.add(Itinerary.test());
-      }
-      _uiData = UiData(
-          itineraryList: _itineraries,
-          places: locations,
-          companies: companies,
-          filterData: ItineraryFilter()
-      );
-    });
+    _uiData = UiData(
+        itineraryList: _itineraries,
+        places: locations,
+        companies: companies,
+        filterData: ItineraryFilter()
+    );
+
 
     _controller.sink.add(ItineraryListUiState.normal(_uiData));
   }
@@ -75,18 +72,13 @@ class ItineraryListBloc implements Bloc {
 
     List<String> companies = await _client.fetchCompanies();
     List<String> locations = await _client.fetchLocations();
-
-    await Future.delayed(Duration(seconds: 2),(){
-      for(int i = 0; i<_count; i++){
-        _itineraries.add(Itinerary.test());
-      }
-      _uiData = UiData(
-          itineraryList: _itineraries,
-          places: locations,
-          companies: companies,
-          filterData: _uiData.filterData
-      );
-    });
+    _itineraries = await _client.fetchItineraries();
+    _uiData = UiData(
+        itineraryList: _itineraries,
+        places: locations,
+        companies: companies,
+        filterData: _uiData.filterData
+    );
 
     _controller.sink.add(ItineraryListUiState.normal(_uiData));
   }
