@@ -2,6 +2,7 @@ import 'dart:math';
 
 class Itinerary{
 
+  int id;
   DateTime start;
   DateTime finish;
   DateTime date;
@@ -12,7 +13,7 @@ class Itinerary{
   int quantity;
   int vacantQuantity;
 
-  Itinerary({this.start, this.finish, this.date, this.from, this.price, this.quantity, this.to, this.transporter, this.vacantQuantity});
+  Itinerary({this.id, this.start, this.finish, this.date, this.from, this.price, this.quantity, this.to, this.transporter, this.vacantQuantity});
 
   Itinerary.test(){
     int randomNumber = Random().nextInt(3) + 1;
@@ -69,6 +70,7 @@ class Itinerary{
 
   Itinerary.fromJson(Map<String, dynamic> json){
     print(json);
+    this.id = json['ID'];
     this.from = json['PlaceFrom'];
     this.to = json['PlaceTo'];
     this.transporter = json['CompanyName'];

@@ -6,6 +6,9 @@ import 'package:aggregator_mobile/widgets/date_picker_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+
+import 'booking.dart';
 
 class ItineraryListScreen extends StatefulWidget{
   @override
@@ -343,7 +346,7 @@ class ItineraryItem extends StatelessWidget{
                     child: Container(
                       //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(item.to, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
                           Text(getTime(item.finish), style: TextStyle(color: Color(0xFFB4B9BF)),)
@@ -416,13 +419,20 @@ class ItineraryItem extends StatelessWidget{
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('от ', style: TextStyle(color: Color(0xFFB4B9BF), fontSize: 16),),
-                          Text(item.price.toString() + ' Р', style: TextStyle(color: Color(0xFF667689), fontSize: 20),)
+                          Icon(CupertinoIcons.money_rubl, color: Color(0xFFB4B9BF)),
+                          Text(item.price.toString(), style: TextStyle(color: Color(0xFF667689), fontSize: 20),)
                         ],
                       ),
                       Container(
+                        width: double.infinity,
+                        height: 40,
                         child: OutlinedButton(
-                          onPressed: () => print(123),
+                          onPressed: () => pushNewScreen(
+                            context,
+                            screen: BookingScreen(item),
+                            withNavBar: false,
+                            pageTransitionAnimation: PageTransitionAnimation.cupertino,
+                          ),
                           child: Text('КУПИТЬ', style: TextStyle(color: Colors.white, fontSize: 18),),
                           style: OutlinedButton.styleFrom(
                             backgroundColor: Colors.green
@@ -431,6 +441,7 @@ class ItineraryItem extends StatelessWidget{
                       )
                     ],
                   ),
+
                 )
               ],
             ),
@@ -441,12 +452,10 @@ class ItineraryItem extends StatelessWidget{
   }
 
   String getTime(DateTime date){
-    print('CHEEEEEECK ${date}');
     return (DateFormat('HH:mm').format(date));
   }
 
   String getDuration(int minutes){
-    print('CHEEEEEECK222222 ${minutes}');
     return '${minutes ~/ 60} ч ${minutes % 60} м';
   }
 }
