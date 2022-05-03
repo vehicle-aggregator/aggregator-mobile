@@ -1,15 +1,16 @@
-import 'dart:math';
-
+import 'package:aggregator_mobile/api/auth.dart';
+import 'package:aggregator_mobile/bloc/bloc.dart';
+import 'package:aggregator_mobile/bloc/booking_bloc.dart';
 import 'package:aggregator_mobile/components/dialogs/booking_confirm_dialog.dart';
 import 'package:aggregator_mobile/models/bus.dart';
 import 'package:aggregator_mobile/models/itinerary.dart';
+import 'package:aggregator_mobile/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:provider/provider.dart';
 
 import '../../routes.dart';
-import 'itinerary_list.dart';
 
 const Map<String,Color> placesColors = const {
   'vacant': Colors.white,
@@ -28,26 +29,32 @@ class BookingScreen extends StatefulWidget{
 
 class BookingState extends State<BookingScreen>{
   final Itinerary trip;
-  Bus bus = Bus([]);
   int order = 0;
+  BookingBloc _bloc;
+  User _user;
 
   BookingState(this.trip);
 
   @override
   void initState() {
-
-    order = 0;
-    for (int i = 1; i <= 12; i++){
-      Line line = Line(places: []);
-      for (int j = 1; j <= (i==12 ? 5 : 4); j++){
-        order++;
-        var r = Random().nextInt(10) + order-5;
-        Place place = Place(number: order, status: order >= r ? 'vacant' : 'engaged');
-        line.places.add(place);
-      }
-      bus.lines.add(line);
-    }
+    AuthModel authModel = Provider.of<AuthModel>(context, listen: false);
+    _user = authModel.user;
+    _bloc = BookingBloc();
+    _bloc.init(trip.id);
     super.initState();
+
+    // order = 0;
+    // for (int i = 1; i <= 12; i++){
+    //   Line line = Line(places: []);
+    //   for (int j = 1; j <= (i==12 ? 5 : 4); j++){
+    //     order++;
+    //     var r = Random().nextInt(10) + order-5;
+    //     Place place = Place(number: order, status: order >= r ? 'vacant' : 'engaged');
+    //     line.places.add(place);
+    //   }
+    //   bus.lines.add(line);
+    // }
+    // super.initState();
   }
 
   String getTime(DateTime date){
@@ -71,199 +78,239 @@ class BookingState extends State<BookingScreen>{
             ),
             iconTheme: IconThemeData(color: Colors.white)
         ),
-      body: Column(
-        children: [
-          Container(
-            margin: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 10),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: StreamBuilder<BookingUiState>(
+        stream: _bloc.stream,
+        initialData: BookingUiState.loading(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
+          Bus bus = snapshot.data?.uiData?.bus;
+          return  Column(
+            children: [
+              Container(
+                margin: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 10),
+                child: Column(
                   children: [
-                    Expanded(
-                      flex: 5,
-                      child:Container(
-                        //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(trip.from, style: TextStyle(color: Color(0xFF667689), fontSize: 22),),
-                            Text(getTime(trip.start), style: TextStyle(color: Color(0xFFB4B9BF)),)
-                          ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child:Container(
+                            //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(trip.from, style: TextStyle(color: Color(0xFF667689), fontSize: 22),),
+                                Text(getTime(trip.start), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+                              child: Icon(Icons.arrow_forward_rounded, color: Color(0xFFB4B9BF),)),
+                        ),
+                        Expanded(
+                            flex: 5,
+                            child: Container(
+                              //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(trip.to, style: TextStyle(color: Color(0xFF667689), fontSize: 22),),
+                                  Text(getTime(trip.finish), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                                ],
+                              ),
+                            )
+                        )
+
+                      ],
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Container(
-                        //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-                          child: Icon(Icons.arrow_forward_rounded, color: Color(0xFFB4B9BF),)),
-                    ),
-                    Expanded(
-                        flex: 5,
-                        child: Container(
-                          //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          child: Row(
                             children: [
-                              Text(trip.to, style: TextStyle(color: Color(0xFF667689), fontSize: 22),),
-                              Text(getTime(trip.finish), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                              Icon(Icons.today_outlined, color: Color(0xFFB4B9BF)),
+                              Text(DateFormat("dd-MM-yyyy").format(trip.date), style: TextStyle(color: Color(0xFF667689), fontSize: 16),),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          child: Row(
+                            children: [
+                              Icon(Icons.timelapse, color: Color(0xFFB4B9BF)),
+                              Text(getDuration(trip.start.difference(trip.finish).inMinutes.abs()), style: TextStyle(color: Color(0xFF667689), fontSize: 16)),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          child: Row(
+                            children: [
+                              Icon(CupertinoIcons.money_rubl, color: Color(0xFFB4B9BF)),
+                              Text(trip.price.toString(), style: TextStyle(color: Color(0xFF667689), fontSize: 16)),
                             ],
                           ),
                         )
+                      ],
                     )
-
                   ],
                 ),
-                SizedBox(height: 10),
-                Row(
+              ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Theme.of(context).primaryColor),
+                      borderRadius: BorderRadius.circular(20)
+                  ),
+                  margin: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                  padding: EdgeInsets.all(20),
+                  child: Builder(
+                    builder: (BuildContext context){
+                      if (snapshot.data.uiState == UiState.loading)
+                        return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
+                      if (bus.seats.isEmpty)
+                        return Text('Автобус еще не добавлен');
+
+                      List<Widget> children = [];
+                      bus.seats.forEach((place) {
+                        children.add(
+                            place.show
+                            ? Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(20),
+                                      topLeft: Radius.circular(20),
+                                    ),
+                                    border: Border.all(color: Theme.of(context).primaryColor),
+                                    color: placesColors[place.status]
+                                ),
+                                child: InkWell(
+                                  onTap: place.status == 'engaged' ? null : () {
+                                    _bloc.selectPlace(place.id, place.status == 'vacant');
+                                  },
+                                  child: Center(child: Text(place.number.toString())),
+                                ),
+                              )
+                            : Container(color: Color(0xFFF5F5F5))
+                        );
+                      });
+
+                      return GridView.count(
+                          crossAxisCount: bus.seats.where((element) => element.row == 1).length,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          children: children
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Container(
+                //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+                margin: EdgeInsets.symmetric(vertical: 5, horizontal: 40),
+
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Text('Баланс:', style: TextStyle(color: Color(0xFF667689), fontSize: 20)),
                     Container(
                       child: Row(
                         children: [
-                          Icon(Icons.today_outlined, color: Color(0xFFB4B9BF)),
-                          Text(DateFormat("dd-MM-yyyy").format(trip.date), style: TextStyle(color: Color(0xFF667689), fontSize: 16),),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      child: Row(
-                        children: [
-                          Icon(Icons.timelapse, color: Color(0xFFB4B9BF)),
-                          Text(getDuration(trip.start.difference(trip.finish).inMinutes.abs()), style: TextStyle(color: Color(0xFF667689), fontSize: 16)),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      child: Row(
-                        children: [
-                          Icon(CupertinoIcons.money_rubl, color: Color(0xFFB4B9BF)),
-                          Text(trip.price.toString(), style: TextStyle(color: Color(0xFF667689), fontSize: 16)),
+                          Text(_user.balance.toString(),
+                              style: TextStyle(
+                                  decoration: (bus?.seats ?? []).any((e) => e.status == 'me') ? TextDecoration.lineThrough : null,
+                                  color: Color(0xFF667689),
+                                  fontSize: 20
+                              )
+                          ),
+                          if ((bus?.seats ?? []).any((e) => e.status == 'me'))
+                            Icon(Icons.arrow_forward_rounded),
+                          if ((bus?.seats ?? []).any((e) => e.status == 'me'))
+                            Text(
+                                (_user.balance - bus.seats.where((e) => e.status == 'me').length * trip.price).toString(),
+                                style: TextStyle(color: Color(0xFF667689), fontSize: 20)
+                            ),
                         ],
                       ),
                     )
-                  ],
-                )
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Theme.of(context).primaryColor),
-                borderRadius: BorderRadius.circular(20)
-              ),
-              margin: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-              padding: EdgeInsets.all(20),
-              child: Builder(
-                builder: (BuildContext context){
-                  List<Widget> children = [];
-
-                  bus.lines.forEach((line) {
-                    line.places.forEach((place) {
-                      children.add(
-                        Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Theme.of(context).primaryColor),
-                              color: placesColors[place.status]
-                          ),
-                          child: InkWell(
-                            onTap: place.status == 'engaged' ? null : () {
-                              setState(() {
-                                place.status = place.status == 'vacant' ? 'me' : 'vacant';
-                              });
-                            },
-                            child: Center(child: Text(place.number.toString())),
-                          ),
-                        )
-                      );
-                      if (place.number % 4 == 2 && place.number < order - 5)
-                        children.add(Container(color: Color(0xFFF5F5F5)));
-                    });
-                  });
-
-
-                  return GridView.count(
-                    crossAxisCount: 5,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    children: children
-                  );
-                },
-              ),
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 40, right: 40, bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          bus.lines.forEach((line) {
-                            line.places.forEach((place) {
-                              if (place.status == 'me')
-                                place.status = 'vacant';
-                            });
-                          });
-                        });
-                      },
-                      child: Text('Сбросить', style: TextStyle(color: Colors.red),),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: BorderSide(color: Colors.red),
-                      ),
-                    ),
-                  ),
+                  ]
                 ),
-                SizedBox(width: 10,),
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: () async {
-
-                        List<Place> places = [];
-                        bus.lines.forEach((line) {
-                          line.places.forEach((place) {
-                            if (place.status == 'me')
-                              places.add(place);
-                          });
-                        });
-
-                        var result = await showDialog(
-                          context: context,
-                          builder: (builderContext) => BookingConfirmDialog(
-                              itinerary: trip,
-                              places: places
-                          )
-                        );
-
-                        if (result == true){
-                          await Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (route) => false);
-                        }
-                      },
-                      child: Text('Подтвердить покупку', style: TextStyle(color: Colors.white, ),),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        side: BorderSide(color: Colors.green),
+              ),
+              Container(
+                padding: EdgeInsets.only(left: 40, right: 40, bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            _bloc.clear();
+                          },
+                          child: Text('Сбросить', style: TextStyle(color: Colors.red),),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: BorderSide(color: Colors.red),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
+                    SizedBox(width: 10,),
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: (bus?.seats ?? []).any((element) => element.status == 'me') &&
+                              _user.balance >= (bus.seats.where((e) => e.status == 'me').length * trip.price) ? () async
+                          {
+
+                            List<Seat> mySeats = [];
+                            bus.seats.forEach((seat) {
+                              if (seat.status == 'me')
+                                mySeats.add(seat);
+                            });
+
+                            var result = await showDialog(
+                                context: context,
+                                builder: (builderContext) => BookingConfirmDialog(
+                                    itinerary: trip,
+                                    places: mySeats,
+                                )
+                            );
+
+                            if (result == true){
+                              await _bloc.buyTicket(trip.id, mySeats.first.id);
+                              await Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (route) => false);
+                            }
+                          } : null,
+                          child: Text('Подтвердить покупку', style: TextStyle(color: Colors.white, ),),
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+                              backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                                    (Set<MaterialState> states){
+                                  if (states.contains(MaterialState.disabled))
+                                    return Colors.grey;
+                                  return Colors.green;
+                                },
+                              ),
+                            ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ],
+          );
+        },
       ) ,
     );
   }
-
 }

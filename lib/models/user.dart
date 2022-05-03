@@ -8,6 +8,7 @@ class User{
   String gender;
   DateTime birthDate;
   String lastname;
+  int balance;
 
   User();
 
@@ -44,10 +45,10 @@ class User{
     this.gender = json['gender'];
     this.name = json['name'];
     this.surname = json['middle_name'];
-    //print('date --> ${json['birthday'].toString().replaceAll("T"," ").substring(0,19)}');
+
     this.birthDate = DateTime.parse(json['birthday']);
-    //this.birthDate = DateTime.parse(json['birthday'].toString().replaceAll("T"," ").substring(0,19));
     this.id = json['ID'];
     this.email = json['email'];
+    this.balance = json['CasualUser'] == null ? null : json['CasualUser'][0]['Balance'];
   }
 }

@@ -81,6 +81,18 @@ class RestClient {
     }
   }
 
+  Future<dynamic> postRaw(String url, body, {Map<String, dynamic> headers = const {}}) async
+  {
+    try{
+      print(body);
+      //FormData fd = FormData.fromMap(body);
+      final response = await _dio.post(url, data: body);
+      return response.data;
+    } catch (e){
+      print('ERRRRRRROOOORRRR ==> $e');
+    }
+  }
+
   // Future<Response<dynamic>> postEmpty(String url, {body, Map<String, dynamic> headers = const {}}) async {
   //   print('post $url');
   //   try {

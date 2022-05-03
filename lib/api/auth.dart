@@ -30,7 +30,9 @@ class AuthModel {
   }) async {
     final body = {'email': email, 'password': password};
     final json = await _client.post(Endpoints.login, body);
-    return setUser(User.fromJson(json));
+    var u = await getUserProfile(json['ID']);
+    print(u);
+    return setUser(u);
   }
 
   Future<User> register(User user, String password) async {

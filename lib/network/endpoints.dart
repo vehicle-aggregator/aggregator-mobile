@@ -12,4 +12,7 @@ class Endpoints {
   static const String places = "place";
   static const String itineraries = "trip";
   static const String companies = "company";
+  static const String bus = "trip/places";
+  static const String ticket = "ticket";
+
 }

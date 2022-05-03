@@ -33,6 +33,8 @@ class _SplashScreenState extends State<SplashScreen> {
       print("id ======. > $id");
       //await Navigator.maybeOf(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);
 
+      //await Navigator.of(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);
+
       try{
         if (id == null)
           await Navigator.of(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);

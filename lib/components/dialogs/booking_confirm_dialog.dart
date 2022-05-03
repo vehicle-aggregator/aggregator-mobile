@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 
 class BookingConfirmDialog extends StatefulWidget {
   final Itinerary itinerary;
-  final List<Place> places;
+  final List<Seat> places;
 
   const BookingConfirmDialog({
     Key key,
@@ -141,7 +141,7 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog>
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Ряд: ${(element.number-1) ~/ 4 + 1}, Место: ${element.number}',style: TextStyle(fontSize: 16)),
+                                    Text('Ряд: ${element.row}, Место: ${element.number}',style: TextStyle(fontSize: 16)),
                                     Text('${widget.itinerary.price} р',style: TextStyle(fontSize: 18))
                                   ],
                                 ),
@@ -190,7 +190,9 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog>
                                     style: OutlinedButton.styleFrom(
                                       backgroundColor: Colors.green,
                                     ),
-                                    onPressed: () => Navigator.pop(context, true),
+                                    onPressed: () {
+                                      Navigator.pop(context, true);
+                                    },
                                     child: Text(
                                       'Подтвердить',
                                       maxLines: 1,
