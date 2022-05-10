@@ -1,13 +1,15 @@
 import 'package:aggregator_mobile/api/booking_client.dart';
 import 'package:aggregator_mobile/api/itinerary_client.dart';
 import 'package:aggregator_mobile/models/bus.dart';
+import 'package:aggregator_mobile/models/user.dart';
 import 'dart:async';
 import 'bloc.dart';
 
 class UiData {
   Bus bus;
+  List<Passenger> passengers = [];
 
-  UiData({this.bus});
+  UiData({this.bus, this.passengers});
 }
 
 class BookingUiState {
@@ -31,6 +33,7 @@ class BookingBloc implements Bloc {
   UiData _uiData;
   Stream<BookingUiState> get stream => _controller.stream;
   Bus _bus;
+  List<Passenger> _passengers = [];
 
   BookingClient _client = BookingClient();
 
@@ -38,33 +41,53 @@ class BookingBloc implements Bloc {
   void dispose() {}
 
 
-  void init(int id) async {
+  void init(int id, User user) async {
     _controller.sink.add(BookingUiState.loading());
 
     _bus = await _client.fetchBus(id);
 
+    Passenger p = Passenger();
+    p.me = true;
+    p.name = user.name;
+    p.surname = user.surname;
+    p.lastname = user.lastname;
+    _passengers.add(p);
+
     _uiData = UiData(
         bus: _bus,
+        passengers: _passengers
     );
 
     _controller.sink.add(BookingUiState.normal(_uiData));
   }
 
   void selectPlace(int id, bool check){
-    if (check)
-      _bus.seats.where((e) => e.status == 'me').forEach((e) => e.status = 'vacant');
+    //if (check)
+    //  _bus.seats.where((e) => e.status == 'me').forEach((e) => e.status = 'vacant');
     _bus.seats.firstWhere((e) => e.id == id).status = check? 'me' : 'vacant';
     _controller.sink.add(BookingUiState.normal(_uiData));
   }
 
-  void clear(){
+  void changePassengers(List<Passenger> passengers){
+    _uiData.passengers = passengers;
+    _controller.sink.add(BookingUiState.normal(_uiData));
+  }
+
+  void clear(User user){
     _bus.seats.where((e) => e.status == 'me').forEach((e) => e.status = 'vacant');
+    Passenger p = Passenger();
+    p.me = true;
+    p.name = user.name;
+    p.surname = user.surname;
+    p.lastname = user.lastname;
+    //_passengers.add(p);
+    _uiData.passengers = [p];
     _controller.sink.add(BookingUiState.normal(_uiData));
 
   }
 
-  Future buyTicket(int tripId, int placeId) async {
-    await _client.buyTicket(tripId, placeId);
+  Future<bool> buyTicket(int tripId, List<Seat> seats, List<Passenger> passengers ) async {
+    return await _client.buyTicket(tripId, seats, passengers);
   }
 
   // Future query() async {

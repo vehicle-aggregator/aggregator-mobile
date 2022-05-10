@@ -10,10 +10,12 @@ import 'package:provider/provider.dart';
 class BookingConfirmDialog extends StatefulWidget {
   final Itinerary itinerary;
   final List<Seat> places;
+  final List<Passenger> passengers;
 
   const BookingConfirmDialog({
     Key key,
     @required this.places,
+    @required this.passengers,
     @required this.itinerary,
   }) : super(key: key);
 
@@ -125,6 +127,37 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog>
                       Container(
                         padding: EdgeInsets.only(top: 5, bottom: 5) ,
                         child:Text('Контактный адрес: ${_user.email}', style: TextStyle(fontSize: 16)),
+                      ),
+                      Container(
+                          padding: EdgeInsets.only(top: 5,),
+                          child: Text('Пассажиры:',style: TextStyle(fontSize: 16))
+                      ),
+                      Divider(),
+                      Builder(
+                        builder: (BuildContext context){
+                          List<Widget> people =[];
+                          widget.passengers.forEach((element) {
+                            people.add(
+                              Container(
+                                child: Text('${element.surname} ${element.name} ${element.lastname}',style: TextStyle(fontSize: 16)),
+                              )
+                            );
+                          });
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                              children: people);
+                        },
+                      ),
+                      Divider(),
+                      Container(
+                        margin: EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Итого:', style: TextStyle(fontSize: 16)),
+                            Text('${widget.passengers.length} мест(а)', style: TextStyle(fontSize: 18))
+                          ],
+                        ),
                       ),
 
                       Container(

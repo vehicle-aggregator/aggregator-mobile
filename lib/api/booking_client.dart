@@ -1,4 +1,5 @@
 import 'package:aggregator_mobile/models/bus.dart';
+import 'package:aggregator_mobile/models/user.dart';
 import 'package:aggregator_mobile/network/endpoints.dart';
 import 'package:aggregator_mobile/network/rest_client.dart';
 
@@ -11,12 +12,21 @@ class BookingClient {
     return a;
   }
 
-  Future buyTicket(int tripId, int placeId) async {
+  Future<bool> buyTicket(int tripId,  List<Seat> seats, List<Passenger> passengers) async {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['tripID'] = tripId;
-    data['places'] = [getId(placeId)];
+    data['places'] = [];
+    seats.forEach((element) {
+      data['places'] = [...data['places'], getId(element.id)];
+    });
+    data['passengers'] = [];
+    passengers.forEach((element) {
+      if (element.id != null)
+        data['passengers'] = [...data['passengers'], getId(element.id)];
+    });
     var json = await _client.postRaw(Endpoints.ticket, data);
-    print('RRREEESSSUUULLL^TTT==========> $json');
+    print('RRREEESSSUUULLLT => $json');
+    return json['ID'] != null;
   }
 
   Map<String, dynamic> getId (id){

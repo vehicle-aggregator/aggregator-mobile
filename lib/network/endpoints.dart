@@ -2,7 +2,6 @@ class Endpoints {
   Endpoints._();
 
   // base url
-  // base url
   static const String localhost = "http://172.16.0.6:8080/api/v1/";
   static const String server = "http://95.66.162.252:15222/api/v1/";
 
@@ -13,6 +12,9 @@ class Endpoints {
   static const String itineraries = "trip";
   static const String companies = "company";
   static const String bus = "trip/places";
-  static const String ticket = "ticket";
+  static const String ticket = "ticket/";
+  static const String history = "casual/history";
+  static const String balance = "casual/balance";
+  static const String passenger = "passenger/create";
 
 }

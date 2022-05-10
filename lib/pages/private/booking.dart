@@ -5,6 +5,7 @@ import 'package:aggregator_mobile/components/dialogs/booking_confirm_dialog.dart
 import 'package:aggregator_mobile/models/bus.dart';
 import 'package:aggregator_mobile/models/itinerary.dart';
 import 'package:aggregator_mobile/models/user.dart';
+import 'package:aggregator_mobile/widgets/row_with_items.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -40,7 +41,7 @@ class BookingState extends State<BookingScreen>{
     AuthModel authModel = Provider.of<AuthModel>(context, listen: false);
     _user = authModel.user;
     _bloc = BookingBloc();
-    _bloc.init(trip.id);
+    _bloc.init(trip.id, _user);
     super.initState();
 
     // order = 0;
@@ -83,10 +84,11 @@ class BookingState extends State<BookingScreen>{
         initialData: BookingUiState.loading(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot){
           Bus bus = snapshot.data?.uiData?.bus;
+          List<Passenger> currentPassengers = snapshot.data?.uiData?.passengers;
           return  Column(
             children: [
               Container(
-                margin: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 10),
+                margin: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 5),
                 child: Column(
                   children: [
                     Row(
@@ -160,13 +162,49 @@ class BookingState extends State<BookingScreen>{
                   ],
                 ),
               ),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Баланс:', style: TextStyle(color: Color(0xFF667689), fontSize: 18)),
+                      Container(
+                        child: Row(
+                          children: [
+                            Icon(CupertinoIcons.money_rubl, color: Color(0xFFB4B9BF)),
+                            Text(_user.balance.toString(),
+                                style: TextStyle(
+                                    decoration: (bus?.seats ?? []).any((e) => e.status == 'me') ? TextDecoration.lineThrough : null,
+                                    color: Color(0xFF667689),
+                                    fontSize: 18
+                                )
+                            ),
+
+                            if ((bus?.seats ?? []).any((e) => e.status == 'me'))
+                              Row(
+                                children: [
+                                  Icon(Icons.arrow_forward_rounded, color: Color(0xFFB4B9BF)),
+                                  Icon(CupertinoIcons.money_rubl, color: Color(0xFFB4B9BF)),
+                                  Text(
+                                      (_user.balance - bus.seats.where((e) => e.status == 'me').length * trip.price).toString(),
+                                      style: TextStyle(color: Color(0xFF667689), fontSize: 18)
+                                  ),
+                                ],
+                              )
+
+                          ],
+                        ),
+                      )
+                    ]
+                ),
+              ),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
                       border: Border.all(color: Theme.of(context).primaryColor),
                       borderRadius: BorderRadius.circular(20)
                   ),
-                  margin: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   padding: EdgeInsets.all(20),
                   child: Builder(
                     builder: (BuildContext context){
@@ -209,39 +247,24 @@ class BookingState extends State<BookingScreen>{
                   ),
                 ),
               ),
-              Container(
-                //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-                margin: EdgeInsets.symmetric(vertical: 5, horizontal: 40),
 
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Баланс:', style: TextStyle(color: Color(0xFF667689), fontSize: 20)),
-                    Container(
-                      child: Row(
-                        children: [
-                          Text(_user.balance.toString(),
-                              style: TextStyle(
-                                  decoration: (bus?.seats ?? []).any((e) => e.status == 'me') ? TextDecoration.lineThrough : null,
-                                  color: Color(0xFF667689),
-                                  fontSize: 20
-                              )
-                          ),
-                          if ((bus?.seats ?? []).any((e) => e.status == 'me'))
-                            Icon(Icons.arrow_forward_rounded),
-                          if ((bus?.seats ?? []).any((e) => e.status == 'me'))
-                            Text(
-                                (_user.balance - bus.seats.where((e) => e.status == 'me').length * trip.price).toString(),
-                                style: TextStyle(color: Color(0xFF667689), fontSize: 20)
-                            ),
-                        ],
-                      ),
-                    )
-                  ]
+
+
+              if ((bus?.seats ?? []).isNotEmpty && snapshot.data.uiState != UiState.loading && bus.seats.any((element) => element.status == 'me'))
+                Container(
+                  child: RowWithItems(
+                    items: currentPassengers,
+                    chooseFrom: _user.passengers.where((element) => !currentPassengers.any((cp)=> cp.id == element.id)).toList(),
+                    onChange: (val) {
+                      _bloc.changePassengers(val);
+                    },
+                    plus: bus.seats.where((element) => element.status == 'me').length > 1 &&
+                        bus.seats.where((element) => element.status == 'me').length != currentPassengers.length,
+                  ),
                 ),
-              ),
+
               Container(
-                padding: EdgeInsets.only(left: 40, right: 40, bottom: 10),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -251,7 +274,7 @@ class BookingState extends State<BookingScreen>{
                         height: 48,
                         child: OutlinedButton(
                           onPressed: () {
-                            _bloc.clear();
+                            _bloc.clear(_user);
                           },
                           child: Text('Сбросить', style: TextStyle(color: Colors.red),),
                           style: OutlinedButton.styleFrom(
@@ -261,14 +284,17 @@ class BookingState extends State<BookingScreen>{
                         ),
                       ),
                     ),
-                    SizedBox(width: 10,),
+                    SizedBox(width: 5,),
                     Expanded(
                       flex: 2,
                       child: Container(
                         height: 48,
                         child: OutlinedButton(
-                          onPressed: (bus?.seats ?? []).any((element) => element.status == 'me') &&
-                              _user.balance >= (bus.seats.where((e) => e.status == 'me').length * trip.price) ? () async
+                          onPressed:
+                              (bus?.seats ?? []).any((element) => element.status == 'me') &&
+                              _user.balance >= (bus.seats.where((e) => e.status == 'me').length * trip.price) &&
+                              currentPassengers.length == bus.seats.where((e) => e.status == 'me').length
+                              ? () async
                           {
 
                             List<Seat> mySeats = [];
@@ -282,11 +308,12 @@ class BookingState extends State<BookingScreen>{
                                 builder: (builderContext) => BookingConfirmDialog(
                                     itinerary: trip,
                                     places: mySeats,
+                                  passengers: currentPassengers
                                 )
                             );
 
                             if (result == true){
-                              await _bloc.buyTicket(trip.id, mySeats.first.id);
+                              var result = await _bloc.buyTicket(trip.id, mySeats, currentPassengers);
                               await Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (route) => false);
                             }
                           } : null,
@@ -310,7 +337,7 @@ class BookingState extends State<BookingScreen>{
             ],
           );
         },
-      ) ,
+      ),
     );
   }
 }

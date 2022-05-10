@@ -1,5 +1,12 @@
 import 'package:intl/intl.dart';
 
+class Man{
+  String name;
+  String surname;
+  String lastname;
+  DateTime birthDate;
+}
+
 class User{
   String name;
   String surname;
@@ -9,6 +16,7 @@ class User{
   DateTime birthDate;
   String lastname;
   int balance;
+  List<Passenger> passengers = [];
 
   User();
 
@@ -50,5 +58,41 @@ class User{
     this.id = json['ID'];
     this.email = json['email'];
     this.balance = json['CasualUser'] == null ? null : json['CasualUser'][0]['Balance'];
+    this.passengers = [];
+    var passengers = json['CasualUser'] == null ? null : json['CasualUser'][0]['Passenger'];
+    passengers.forEach((e) {
+      this.passengers.add(Passenger.fromJson(e));
+    });
+  }
+}
+
+class Passenger extends Man{
+  int id;
+  String docdetail;
+  String doctype;
+  bool me = false;
+
+  Passenger();
+  Passenger.fromJson(Map<String, dynamic> json){
+    print('AAAAAAAAA ==> ${json['LastName']}');
+    print('---> ${json['ID'] is int}');
+    this.id = json['ID'];
+    // this.doctype = json['DocumentTypeP'];
+    // this.docdetail = json['DocumentDetail'];
+    this.lastname = json['LastName'];
+    this.surname = json['MiddleName'];
+    this.name = json['Name'];
+    this.birthDate = DateTime.parse(json['Birthday']);
+  }
+
+  bool isValid(){
+    return
+      this.surname != null && this.surname != '' &&
+      this.name != null && this.name != '' &&
+      this.lastname != null && this.lastname != '' &&
+      this.birthDate != null &&
+      this.docdetail != null && this.docdetail != '' &&
+      this.doctype != null && this.doctype != ''
+    ;
   }
 }

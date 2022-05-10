@@ -1,10 +1,13 @@
 import 'package:aggregator_mobile/api/auth.dart';
+import 'package:aggregator_mobile/bloc/bloc.dart';
+import 'package:aggregator_mobile/bloc/history_block.dart';
+import 'package:aggregator_mobile/components/dialogs/change_balance_dialog.dart';
+import 'package:aggregator_mobile/models/history.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import 'navigation/bottom_navigation.dart';
-import 'navigation/tab_item.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BalanceScreen extends StatefulWidget{
   @override
@@ -13,13 +16,29 @@ class BalanceScreen extends StatefulWidget{
 
 class BalanceState extends State<BalanceScreen>{
   AuthModel auth;
+  HistoryListBloc _bloc;
+
+  @override
+  void initState() {
+    _bloc = HistoryListBloc();
+    _bloc.init();
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     auth = Provider.of<AuthModel>(context);
-
     return Scaffold(
-      backgroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Theme.of(context).primaryColor,
+          child: Icon(Icons.refresh, color: Colors.white,),
+          onPressed: () async {
+            _bloc.refresh = true;
+            await _bloc.reload();
+          },
+        ),
       appBar: AppBar(
           title: Container(
             child: Text('Баланс'),
@@ -34,90 +53,183 @@ class BalanceState extends State<BalanceScreen>{
           ],
           iconTheme: IconThemeData(color: Colors.white)
       ),
-      body: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-                color: Color(0xFFF5F5F5), borderRadius: BorderRadius.all(Radius.circular(15))
-            ),
-            margin: EdgeInsets.all(15),
-            padding: EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: StreamBuilder<HistoryListUiState>(
+          stream: _bloc.stream,
+          initialData: HistoryListUiState.loading(),
+          builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+            return Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Ваш баланс:', style: TextStyle(fontSize: 16, color: Color(0xFF667689)),),
-                        Container(
-                          child: Row(
+                Container(
+                  decoration: BoxDecoration(
+                      color: Color(0xFFF5F5F5), borderRadius: BorderRadius.all(Radius.circular(15))
+                  ),
+                  margin: EdgeInsets.all(15),
+                  padding: EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(auth.user.balance.toString(), style: TextStyle(fontSize: 24, color: Color(0xFF667689)),),
-                              Icon(CupertinoIcons.money_rubl, color: Color(0xFF667689))
+                              Text('Ваш баланс:', style: TextStyle(fontSize: 16, color: Color(0xFF667689)),),
+                              Container(
+                                child: Row(
+                                  children: [
+                                    Text(auth.user.balance.toString(), style: TextStyle(fontSize: 24, color: Color(0xFF667689)),),
+                                    Icon(CupertinoIcons.money_rubl, color: Color(0xFF667689))
+                                  ],
+                                ),
+                              )
                             ],
                           ),
-                        )
-                      ],
-                    ),
-                    Container(
-                      height: 48,
-                      child: OutlinedButton(
-                          onPressed: () => print(123),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            side: BorderSide(color: Colors.green),
+                          Container(
+                            height: 48,
+                            child: OutlinedButton(
+                                onPressed: () async {
+                                  var result = await showDialog(
+                                      context: context,
+                                      builder: (builderContext) => ChangeBalanceDialog()
+                                  );
+                                  if (result){
+                                    var instance = await SharedPreferences.getInstance();
+                                    await this.auth.getUserProfile(instance.getInt('ID'));
+                                    setState(() {});
+                                  }
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  side: BorderSide(color: Colors.green),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.add, color: Colors.white,),
+                                    Text('Пополнить', style: TextStyle(color: Colors.white, fontSize: 18),)
+                                  ],
+                                )
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.add, color: Colors.white,),
-                              Text('Пополнить', style: TextStyle(color: Colors.white, fontSize: 18),)
-                            ],
-                          )
+                        ],
                       ),
-                    ),
-                  ],
+                      Container(
+                          margin: EdgeInsets.only(top: 10),
+                          child: Text('Доступно 120 бонусов спасибо', style: TextStyle(color: Color(0xFF667689)),)
+                      )
+                    ],
+                  ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(top: 10),
-                    child: Text('Доступно 120 бонусов спасибо', style: TextStyle(color: Color(0xFF667689)),)
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('История оплат', style: TextStyle(color: Color(0xFF988AAC), fontSize: 24),),
+                      IconButton(
+                          onPressed: () => print(123),
+                          icon: Icon(Icons.menu, color: Color(0xFF988AAC))
+                      )
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: HistoryList(bloc: _bloc, snapshot: snapshot),
                 )
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('История оплат', style: TextStyle(color: Color(0xFF988AAC), fontSize: 24),),
-                IconButton(
-                    onPressed: () => print(123),
-                    icon: Icon(Icons.delete, color: Colors.red,)
-                )
-              ],
-            ),
-          ),
-          Expanded(
-              child: ListView(
-                children: [
-                  HistoryItem(),
-                  HistoryItem(),
-                  HistoryItem(),
-                  HistoryItem(),HistoryItem(),HistoryItem(), SizedBox(height: 20,)
-                ],
-              )
-          )
 
-        ],
+              ],
+            );
+          }
       )
     );
   }
 }
 
+class HistoryList extends StatefulWidget{
+  final snapshot;
+  final HistoryListBloc _bloc;
+
+  const HistoryList({
+    Key key,
+    @required HistoryListBloc bloc,
+    @required this.snapshot,
+  })  : _bloc = bloc, super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => HistoryListState();
+}
+
+class HistoryListState extends State<HistoryList>{
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!_isBottom)
+      return;
+    print('ON SCROLL');
+    //widget._bloc.loadMore();
+  }
+
+  bool get _isBottom {
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.95);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    final HistoryListUiState state = widget.snapshot.data;
+    List<History> historyList = state.uiData?.historyList ?? [];
+
+    if (state.uiState == UiState.loading){
+      return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
+    }
+
+    return RefreshIndicator(
+        onRefresh: () async {
+          print('REFRESH');
+          //await widget._bloc.updateUserData(context);
+          widget._bloc.refresh = true;
+          await widget._bloc.reload();
+        },
+        child: ListView.builder(
+          physics: AlwaysScrollableScrollPhysics(),
+          controller: _scrollController,
+          itemCount: //widget._bloc.canLoadMore() ? itineraries.length + 1 :
+          historyList.length + 1,
+          itemBuilder: (context, index) {
+            if (index >= historyList.length)
+              return Container(
+                height: 75,
+              );
+            final item = historyList[index];
+            return HistoryItem(key: Key(index.toString()), item: item);
+          },
+        )
+    );
+  }
+
+}
+
 class HistoryItem extends StatelessWidget{
+  final History item;
+
+  const HistoryItem({Key key, this.item}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -137,11 +249,10 @@ class HistoryItem extends StatelessWidget{
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Владимир',//item.from,
+                          item.trip.from,
                           style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
                         Text(
-                          '13:00',
-                          //getTime(item.start),
+                          getTime(item.trip.start),
                           style: TextStyle(color: Color(0xFFB4B9BF)),
                         )
                       ],
@@ -163,12 +274,10 @@ class HistoryItem extends StatelessWidget{
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'Ковров',
-                            //item.to,
+                            item.trip.to,
                             style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
                           Text(
-                            '15:00',
-                            //getTime(item.finish),
+                            getTime(item.trip.finish),
                             style: TextStyle(color: Color(0xFFB4B9BF)),
                           )
                         ],
@@ -200,8 +309,7 @@ class HistoryItem extends StatelessWidget{
                                 children: [
                                   Icon(Icons.today_outlined, color: Color(0xFFB4B9BF)),
                                   Text(
-                                    '22-04-2022',
-                                    //DateFormat("dd-MM-yyyy").format(item.date),
+                                    DateFormat("dd-MM-yyyy").format(item.trip.date),
                                     style: TextStyle(color: Color(0xFFB4B9BF)),),
                                 ],
                               ),
@@ -213,8 +321,7 @@ class HistoryItem extends StatelessWidget{
                                   children: [
                                     Icon(Icons.timelapse, color: Color(0xFFB4B9BF),),
                                     Text(
-                                      '2ч 30м',
-                                      //getDuration(item.start.difference(item.finish).inMinutes.abs()),
+                                      getDuration(item.trip.start.difference(item.trip.finish).inMinutes.abs()),
                                       style: TextStyle(color: Color(0xFFB4B9BF)),
                                     )
                                   ],
@@ -251,15 +358,14 @@ class HistoryItem extends StatelessWidget{
                         children: [
                           Icon(CupertinoIcons.money_rubl, color: Color(0xFF667689), size: 32,),
                           Text(
-                            '1000',
-                            //item.price.toString(),
+                            (item.trip.price * ((item.passengers?.length ?? 0) + 1)).toString(),
                             style: TextStyle(color: Color(0xFF667689), fontSize: 26),)
                         ],
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text('+ 135', style: TextStyle(color:Color(0xFFB4B9BF))),
+                          //Text('+ 135', style: TextStyle(color:Color(0xFFB4B9BF))),
                           OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               backgroundColor: Color(0xFFB4B9BF)
@@ -279,6 +385,14 @@ class HistoryItem extends StatelessWidget{
           ],
         )
     );
+  }
+
+  String getTime(DateTime date){
+    return (DateFormat('HH:mm').format(date));
+  }
+
+  String getDuration(int minutes){
+    return '${minutes ~/ 60} ч ${minutes % 60} м';
   }
 
 }

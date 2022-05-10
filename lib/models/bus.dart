@@ -25,6 +25,7 @@ class Seat{
   Seat({this.status,this.number,this.id,this.busy,this.column, this.row, this.show});
 
   Seat.fromJson(Map<String, dynamic> json){
+    print('++++++++++++++++++++++ $json');
     this.id = json['ID'];
     this.show = json['Show'];
     this.busy = json['Busy'];

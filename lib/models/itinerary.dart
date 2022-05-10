@@ -71,11 +71,14 @@ class Itinerary{
   Itinerary.fromJson(Map<String, dynamic> json){
     print(json);
     this.id = json['ID'];
-    this.from = json['PlaceFrom'];
-    this.to = json['PlaceTo'];
+    this.from = json['PlaceFrom'] == null ? json['From'] : json['PlaceFrom'];
+    this.to = json['PlaceTo'] == null ? json['To'] : json['PlaceTo'];
     this.transporter = json['CompanyName'];
     this.price = (json['Price'] as int).toDouble();
-    this.vacantQuantity = json['PassengerCount'] - json['TicketBought'];
+    if(json['PassengerCount'] != null){
+      this.vacantQuantity = json['PassengerCount'] - json['TicketBought'];
+    }
+
     this.start = DateTime.parse(json['StartAt']);
     this.finish = DateTime.parse(json['EndAt']);
     this.date = DateTime.parse(json['StartAt']);
