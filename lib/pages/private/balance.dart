@@ -335,13 +335,22 @@ class HistoryItem extends StatelessWidget{
                         height: 30,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
-                          color: Colors.green
+                          color: DateTime.now().isAfter(item.trip.start)
+                              ? Colors.green
+                              : DateTime.now().isBefore(item.trip.start) && DateTime.now().isAfter(item.trip.finish)
+                              ? Theme.of(context).primaryColor
+                              : Colors.yellow,
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.check, color: Colors.white),
-                              Text('Завершено', style: TextStyle(color: Colors.white))
+                              Text( DateTime.now().isAfter(item.trip.start)
+                                  ? 'Завершено'
+                                  : DateTime.now().isBefore(item.trip.start) && DateTime.now().isAfter(item.trip.finish)
+                                  ? 'В процессе'
+                                  : 'Предстоит',
+                                  style: TextStyle(color: Colors.white))
                             ]
                         ),
                       ),
@@ -353,26 +362,56 @@ class HistoryItem extends StatelessWidget{
                   flex: 3,
                   child: Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(CupertinoIcons.money_rubl, color: Color(0xFF667689), size: 32,),
-                          Text(
-                            (item.trip.price * ((item.passengers?.length ?? 0) + 1)).toString(),
-                            style: TextStyle(color: Color(0xFF667689), fontSize: 26),)
-                        ],
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 5) ,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Icon(CupertinoIcons.money_rubl, color: Color(0xFF667689), size: 32,),
+                            Text(
+                              (item.trip.price * ((item.passengers?.length ?? 0) + 1)).toString(),
+                              style: TextStyle(color: Color(0xFF667689), fontSize: 26),)
+                          ],
+                        ),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          //Text('+ 135', style: TextStyle(color:Color(0xFFB4B9BF))),
-                          OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Color(0xFFB4B9BF)
-                            ),
-                              onPressed: () => print(678),
-                              child: Icon(Icons.menu,color: Colors.white,)
+                          PopupMenuButton(
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFB4B9BF),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                                child: Icon(Icons.menu,color: Colors.white, size: 28,)),
+                            onSelected: (value){
+
+                            },
+                            itemBuilder: (BuildContext bc) {
+                              return const [
+                                PopupMenuItem(
+                                  child: Text("Открыть"),
+                                  value: '/hello',
+                                ),
+                                PopupMenuItem(
+                                  child: Text("Оценить"),
+                                  value: '/about',
+                                ),
+                                PopupMenuItem(
+                                  child: Text("Отменить"),
+                                  value: '/contact',
+                                )
+                              ];
+                            },
                           )
+                          // OutlinedButton(
+                          //   style: OutlinedButton.styleFrom(
+                          //     backgroundColor: Color(0xFFB4B9BF)
+                          //   ),
+                          //     onPressed: () => print(678),
+                          //     child: Icon(Icons.menu,color: Colors.white,)
+                          // )
                         ]
                       )
                     ],
