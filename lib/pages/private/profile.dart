@@ -149,7 +149,7 @@ class ProfileState extends State<ProfileScreen>{
                               child: Row(
                                 children: [
                                   Text('Пол: '),
-                                  Text(auth.user.gender == 'male' ? 'Мужской': 'Женский', style: TextStyle(fontSize: 18, color: Color(0xFF667689)),)
+                                  Text(auth.user.gender, style: TextStyle(fontSize: 18, color: Color(0xFF667689)),)
                                 ],
                               ),
                             ),

@@ -8,7 +8,8 @@ class HistoryClient{
   Future<List<History>> fetchHistory() async {
     dynamic json = await _client.get(Endpoints.history);
     List<History> a = [];
-    json.forEach((e) => a.add(History.fromJson(e)));
+    if (json != null)
+      json.forEach((e) => a.add(History.fromJson(e)));
     return a;
   }
 
