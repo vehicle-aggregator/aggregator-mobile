@@ -25,8 +25,7 @@ class BookingClient {
         data['passengers'] = [...data['passengers'], getId(element.id)];
     });
     var json = await _client.postRaw(Endpoints.ticket, data);
-    print('RRREEESSSUUULLLT => $json');
-    return json['ID'] != null;
+    return json['ID'].toString() != null;
   }
 
   Map<String, dynamic> getId (id){
@@ -35,16 +34,16 @@ class BookingClient {
     };
   }
 
-  // Map<String, dynamic> toJson({String password = ''}) {
-  //   final Map<String, dynamic> data = new Map<String, dynamic>();
-  //   data['lastname'] = this.lastname;
-  //   data['name'] = this.name;
-  //   data['middlename'] = this.surname;
-  //   data['birthday'] = DateFormat("yyyy-MM-dd").format(this.birthDate);
-  //   data['coins'] = 0;
-  //   data['gender'] = this.gender;
-  //   data['email'] = this.email;
-  //   data['password'] = password;
-  //   return data;
-  // }
+// Map<String, dynamic> toJson({String password = ''}) {
+//   final Map<String, dynamic> data = new Map<String, dynamic>();
+//   data['lastname'] = this.lastname;
+//   data['name'] = this.name;
+//   data['middlename'] = this.surname;
+//   data['birthday'] = DateFormat("yyyy-MM-dd").format(this.birthDate);
+//   data['coins'] = 0;
+//   data['gender'] = this.gender;
+//   data['email'] = this.email;
+//   data['password'] = password;
+//   return data;
+// }
 }

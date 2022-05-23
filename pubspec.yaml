@@ -16,6 +16,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  auto_size_text: 2.1.0
+  qr_flutter: 4.0.0
   bloc: 8.0.0
   outline_material_icons: 0.1.1
   persistent_bottom_nav_bar: 4.0.0

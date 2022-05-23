@@ -70,15 +70,15 @@ class BookingState extends State<BookingScreen>{
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
-        appBar: AppBar(
-            titleSpacing: 0.0,
-            title: Container(
-              alignment: Alignment.center,
-              margin: EdgeInsets.only(right: 50),
-              child: Text('Покупка билета'),
-            ),
-            iconTheme: IconThemeData(color: Colors.white)
-        ),
+      appBar: AppBar(
+          titleSpacing: 0.0,
+          title: Container(
+            alignment: Alignment.center,
+            margin: EdgeInsets.only(right: 50),
+            child: Text('Покупка билета'),
+          ),
+          iconTheme: IconThemeData(color: Colors.white)
+      ),
       body: StreamBuilder<BookingUiState>(
         stream: _bloc.stream,
         initialData: BookingUiState.loading(),
@@ -217,23 +217,23 @@ class BookingState extends State<BookingScreen>{
                       bus.seats.forEach((place) {
                         children.add(
                             place.show
-                            ? Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20),
-                                    ),
-                                    border: Border.all(color: Theme.of(context).primaryColor),
-                                    color: placesColors[place.status]
-                                ),
-                                child: InkWell(
-                                  onTap: place.status == 'engaged' ? null : () {
-                                    _bloc.selectPlace(place.id, place.status == 'vacant');
-                                  },
-                                  child: Center(child: Text(place.number.toString())),
-                                ),
-                              )
-                            : Container(color: Color(0xFFF5F5F5))
+                                ? Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20),
+                                  ),
+                                  border: Border.all(color: Theme.of(context).primaryColor),
+                                  color: placesColors[place.status]
+                              ),
+                              child: InkWell(
+                                onTap: place.status == 'engaged' ? null : () {
+                                  _bloc.selectPlace(place.id, place.status == 'vacant');
+                                },
+                                child: Center(child: Text(place.number.toString())),
+                              ),
+                            )
+                                : Container(color: Color(0xFFF5F5F5))
                         );
                       });
 
@@ -256,7 +256,8 @@ class BookingState extends State<BookingScreen>{
                     items: currentPassengers,
                     chooseFrom: _user.passengers.where((element) => !currentPassengers.any((cp)=> cp.id == element.id)).toList(),
                     onChange: (val) {
-                      _bloc.changePassengers(val);
+                      if (!val.contains(null))
+                        _bloc.changePassengers(val);
                     },
                     plus: bus.seats.where((element) => element.status == 'me').length > 1 &&
                         bus.seats.where((element) => element.status == 'me').length != currentPassengers.length,
@@ -291,7 +292,7 @@ class BookingState extends State<BookingScreen>{
                         height: 48,
                         child: OutlinedButton(
                           onPressed:
-                              (bus?.seats ?? []).any((element) => element.status == 'me') &&
+                          (bus?.seats ?? []).any((element) => element.status == 'me') &&
                               _user.balance >= (bus.seats.where((e) => e.status == 'me').length * trip.price) &&
                               currentPassengers.length == bus.seats.where((e) => e.status == 'me').length
                               ? () async
@@ -308,26 +309,29 @@ class BookingState extends State<BookingScreen>{
                                 builder: (builderContext) => BookingConfirmDialog(
                                     itinerary: trip,
                                     places: mySeats,
-                                  passengers: currentPassengers
+                                    onConfirm: () async {
+                                      await _bloc.buyTicket(trip.id, mySeats, currentPassengers);
+                                      //await Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (route) => false);
+                                    },
+                                    passengers: currentPassengers
                                 )
                             );
-
-                            if (result == true){
-                              var result = await _bloc.buyTicket(trip.id, mySeats, currentPassengers);
-                              await Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (route) => false);
+                            //
+                             if (result == true){
+                               await Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (route) => false);
                             }
                           } : null,
                           child: Text('Подтвердить покупку', style: TextStyle(color: Colors.white, ),),
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
-                              backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                                    (Set<MaterialState> states){
-                                  if (states.contains(MaterialState.disabled))
-                                    return Colors.grey;
-                                  return Colors.green;
-                                },
-                              ),
+                          style: ButtonStyle(
+                            shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+                            backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                                  (Set<MaterialState> states){
+                                if (states.contains(MaterialState.disabled))
+                                  return Colors.grey;
+                                return Colors.green;
+                              },
                             ),
+                          ),
                         ),
                       ),
                     )

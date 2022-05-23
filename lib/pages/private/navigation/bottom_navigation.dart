@@ -18,7 +18,7 @@ class BottomNavigation extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       items: [
         _buildItem(TabItem.DISCOUNT),
-        _buildItem(TabItem.HISTORY),
+        //_buildItem(TabItem.HISTORY),
         _buildItem(TabItem.ITINERARY),
         _buildItem(TabItem.BALANCE),
         _buildItem(TabItem.PROFILE),

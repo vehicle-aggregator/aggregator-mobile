@@ -8,8 +8,12 @@ class HistoryClient{
   Future<List<History>> fetchHistory() async {
     dynamic json = await _client.get(Endpoints.history);
     List<History> a = [];
-    print('KKKKKKKKKKKKKKKKKKKKKKK ${json}');
     json.forEach((e) => a.add(History.fromJson(e)));
     return a;
+  }
+
+  Future<bool> addFeedback(dynamic model) async {
+    dynamic json = await _client.postRaw(Endpoints.feedback, model);
+    return json['ID'].toString() == null;
   }
 }

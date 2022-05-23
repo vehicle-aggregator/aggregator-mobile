@@ -88,9 +88,6 @@ class ItineraryListBloc implements Bloc {
   }
 
   bool canLoadMore() {
-    print('OFFSET => $_offset');
-    print('COUNT => $_count');
-    print('TOTAL => $_total');
     return _offset < _total && _total > _count;
   }
 

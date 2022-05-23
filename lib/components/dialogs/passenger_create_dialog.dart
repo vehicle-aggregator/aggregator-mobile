@@ -126,7 +126,6 @@ class _BookingConfirmDialogState extends State<PassengerCreateDialog> with Singl
                           value: this.passenger?.birthDate,
                           hint: "Дата рождения",
                           onChange: (value) {
-                            print(value);
                             setState(() {
                               this.passenger.birthDate = value;
                             });

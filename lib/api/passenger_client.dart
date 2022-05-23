@@ -16,7 +16,6 @@ class PassengerClient{
     data['doctype'] = item.doctype == 'Паспорт' ? 0 : 1;
     data['docdetail'] = item.docdetail;
     var json = await _client.post(Endpoints.passenger, data);
-    print('==========> $json');
     return json['ID'] != null;
   }
 }

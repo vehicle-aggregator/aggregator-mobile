@@ -11,12 +11,14 @@ class BookingConfirmDialog extends StatefulWidget {
   final Itinerary itinerary;
   final List<Seat> places;
   final List<Passenger> passengers;
+  final Function onConfirm;
 
   const BookingConfirmDialog({
     Key key,
     @required this.places,
     @required this.passengers,
     @required this.itinerary,
+    this.onConfirm
   }) : super(key: key);
 
   @override
@@ -138,13 +140,13 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog>
                           List<Widget> people =[];
                           widget.passengers.forEach((element) {
                             people.add(
-                              Container(
-                                child: Text('${element.surname} ${element.name} ${element.lastname}',style: TextStyle(fontSize: 16)),
-                              )
+                                Container(
+                                  child: Text('${element.surname} ${element.name} ${element.lastname}',style: TextStyle(fontSize: 16)),
+                                )
                             );
                           });
                           return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: people);
                         },
                       ),
@@ -161,7 +163,7 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog>
                       ),
 
                       Container(
-                        padding: EdgeInsets.only(top: 5,),
+                          padding: EdgeInsets.only(top: 5,),
                           child: Text('Места:',style: TextStyle(fontSize: 16))
                       ),
                       Divider(),
@@ -170,15 +172,15 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog>
                           List<Widget> tickets =[];
                           widget.places.forEach((element) {
                             tickets.add(
-                              Container(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('Ряд: ${element.row}, Место: ${element.number}',style: TextStyle(fontSize: 16)),
-                                    Text('${widget.itinerary.price} р',style: TextStyle(fontSize: 18))
-                                  ],
-                                ),
-                              )
+                                Container(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('Ряд: ${element.row}, Место: ${element.number}',style: TextStyle(fontSize: 16)),
+                                      Text('${widget.itinerary.price} р',style: TextStyle(fontSize: 18))
+                                    ],
+                                  ),
+                                )
                             );
                           });
                           return Column(children: tickets);
@@ -224,6 +226,7 @@ class _BookingConfirmDialogState extends State<BookingConfirmDialog>
                                       backgroundColor: Colors.green,
                                     ),
                                     onPressed: () {
+                                      widget.onConfirm();
                                       Navigator.pop(context, true);
                                     },
                                     child: Text(

@@ -64,14 +64,14 @@ Future<dynamic> showAlertDialogWithTwoButtons({
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   OutlinedButton(
                     style: OutlinedButton.styleFrom().copyWith(
                       side: MaterialStateProperty.resolveWith<BorderSide>(
                             (Set<MaterialState> states) {
                           return BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Colors.red,
                             width: 1,
                           );
                         },
@@ -83,7 +83,7 @@ Future<dynamic> showAlertDialogWithTwoButtons({
                     child: Text(
                       cancelBtnText,
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Colors.red,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -94,6 +94,10 @@ Future<dynamic> showAlertDialogWithTwoButtons({
                       backgroundColor: Theme.of(context).primaryColor,
                     ),
                     onPressed: () {
+
+
+
+                      // cancel trip method
                       Navigator.pop(context,true);
                     },
                     child: Text(

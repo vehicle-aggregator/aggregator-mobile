@@ -74,6 +74,7 @@ class RestClient {
   {
     try{
       FormData fd = FormData.fromMap(body);
+
       final response = await _dio.post(url, data: fd);
       return response.data;
     } catch (e){
@@ -84,7 +85,6 @@ class RestClient {
   Future<dynamic> postRaw(String url, body, {Map<String, dynamic> headers = const {}}) async
   {
     try{
-      print(body);
       //FormData fd = FormData.fromMap(body);
       final response = await _dio.post(url, data: body);
       return response.data;
@@ -117,7 +117,6 @@ class RestClient {
   }
 
   Future<dynamic> postFile(String url, File file) async {
-    print('post file $url');
     try {
       String fileName = file.path.split('/').last;
       FormData formData = FormData.fromMap({

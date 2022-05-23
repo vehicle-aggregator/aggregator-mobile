@@ -74,11 +74,7 @@ class Passenger extends Man{
 
   Passenger();
   Passenger.fromJson(Map<String, dynamic> json){
-    print('AAAAAAAAA ==> ${json['LastName']}');
-    print('---> ${json['ID'] is int}');
     this.id = json['ID'];
-    // this.doctype = json['DocumentTypeP'];
-    // this.docdetail = json['DocumentDetail'];
     this.lastname = json['LastName'];
     this.surname = json['MiddleName'];
     this.name = json['Name'];

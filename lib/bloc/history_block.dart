@@ -56,6 +56,12 @@ class HistoryListBloc implements Bloc {
     _controller.sink.add(HistoryListUiState.normal(_uiData));
   }
 
+  dropItem(int id){
+    _controller.sink.add(HistoryListUiState.loading());
+    _uiData.historyList.removeWhere((element) => element.id == id);
+    _controller.sink.add(HistoryListUiState.normal(_uiData));
+  }
+
   reload() async {
     _historyList = [];
     init();

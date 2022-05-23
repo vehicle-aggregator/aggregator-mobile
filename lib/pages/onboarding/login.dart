@@ -293,7 +293,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future authorize() async {
     try{
-      print(registration);
     if (!registration){
       var result = await _auth.login(email: _email, password: _password, context: context);
       if (result == null)

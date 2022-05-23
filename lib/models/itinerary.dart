@@ -69,7 +69,6 @@ class Itinerary{
   }
 
   Itinerary.fromJson(Map<String, dynamic> json){
-    print(json);
     this.id = json['ID'];
     this.from = json['PlaceFrom'] == null ? json['From'] : json['PlaceFrom'];
     this.to = json['PlaceTo'] == null ? json['To'] : json['PlaceTo'];

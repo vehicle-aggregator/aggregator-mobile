@@ -10,6 +10,17 @@ class Bus {
       seats.add(Seat.fromJson(value));
     });
     this.seats = seats;
+    this.seats.sort((a, b) {
+      if (a.row > b.row)
+        return 1;
+      else
+      if (a.row < b.row)
+        return -1;
+      else
+      if (a.column > b.column)
+        return 1;
+      else return -1;
+    });
   }
 }
 
@@ -25,7 +36,6 @@ class Seat{
   Seat({this.status,this.number,this.id,this.busy,this.column, this.row, this.show});
 
   Seat.fromJson(Map<String, dynamic> json){
-    print('++++++++++++++++++++++ $json');
     this.id = json['ID'];
     this.show = json['Show'];
     this.busy = json['Busy'];

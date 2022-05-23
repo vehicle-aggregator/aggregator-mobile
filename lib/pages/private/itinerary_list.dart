@@ -1,6 +1,7 @@
 import 'package:aggregator_mobile/bloc/bloc.dart';
 import 'package:aggregator_mobile/bloc/itinerary_list_bloc.dart';
 import 'package:aggregator_mobile/components/dialogs/search_location.dart';
+import 'package:aggregator_mobile/helpers/date_time_helper.dart';
 import 'package:aggregator_mobile/models/itinerary.dart';
 import 'package:aggregator_mobile/widgets/date_picker_widget.dart';
 import 'package:flutter/cupertino.dart';
@@ -43,13 +44,13 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
       appBar: AppBar(
         title: Text('Маршруты'),
         actions: [
-            IconButton(
-              icon: isFiltersOn ? Icon(Icons.clear) : Icon(Icons.search),
-              onPressed: () => setState((){
-                _bloc.clearFilters();
-                isFiltersOn = !isFiltersOn;
-              }),
-            ),
+          IconButton(
+            icon: isFiltersOn ? Icon(Icons.clear) : Icon(Icons.search),
+            onPressed: () => setState((){
+              _bloc.clearFilters();
+              isFiltersOn = !isFiltersOn;
+            }),
+          ),
         ],
       ),
       body: StreamBuilder<ItineraryListUiState>(
@@ -67,48 +68,48 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
                         child: Row(
                           children: [
                             Expanded(
-                              child: GestureDetector(
-                                onTap: () async {
-                                  FocusManager.instance.primaryFocus.unfocus();
-                                  final location = await showDialog(
-                                      context: context,
-                                      builder: (builderContext) => SearchLocationDialog(
-                                        items: snapshot.data.uiData.places
-                                      )
-                                  );
-                                  setState(() {
-                                    from = location;
-                                    snapshot.data.uiData.filterData.from = location;
-                                  });
-                                },
-                                child: Container(
-                                  height: 48,
-                                  padding: EdgeInsets.only(left: 15, right: 15),
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(snapshot.data.uiData?.filterData?.from == null ? 'Откуда': snapshot.data.uiData.filterData.from,
-                                      style: TextStyle(
-                                          color: snapshot.data.uiData?.filterData?.from == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
-                                          fontSize: 16
-                                      )
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    FocusManager.instance.primaryFocus.unfocus();
+                                    final location = await showDialog(
+                                        context: context,
+                                        builder: (builderContext) => SearchLocationDialog(
+                                            items: snapshot.data.uiData.places
+                                        )
+                                    );
+                                    setState(() {
+                                      from = location;
+                                      snapshot.data.uiData.filterData.from = location;
+                                    });
+                                  },
+                                  child: Container(
+                                    height: 48,
+                                    padding: EdgeInsets.only(left: 15, right: 15),
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(snapshot.data.uiData?.filterData?.from == null ? 'Откуда': snapshot.data.uiData.filterData.from,
+                                        style: TextStyle(
+                                            color: snapshot.data.uiData?.filterData?.from == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
+                                            fontSize: 16
+                                        )
+                                    ),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Color(0xFFEDEBF0), width: 1),
+                                        borderRadius: BorderRadius.circular(40)
+                                    ),
                                   ),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Color(0xFFEDEBF0), width: 1),
-                                    borderRadius: BorderRadius.circular(40)
-                                  ),
-                                ),
-                              )
+                                )
                             ),
                             IconButton(
-                                  icon: Icon(Icons.repeat, color: Color(0xFF667689)),
-                                onPressed: () {
-                                    String temp = to;
-                                    to = from;
-                                    from = temp;
-                                    snapshot.data.uiData.filterData.from = from;
-                                    snapshot.data.uiData.filterData.to = to;
-                                    setState(() {});
-                                },
-                              ),
+                              icon: Icon(Icons.repeat, color: Color(0xFF667689)),
+                              onPressed: () {
+                                String temp = to;
+                                to = from;
+                                from = temp;
+                                snapshot.data.uiData.filterData.from = from;
+                                snapshot.data.uiData.filterData.to = to;
+                                setState(() {});
+                              },
+                            ),
                             Expanded(
                                 child: GestureDetector(
                                   onTap: () async {
@@ -116,7 +117,7 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
                                     final location = await showDialog(
                                         context: context,
                                         builder: (builderContext) => SearchLocationDialog(
-                                          items: snapshot.data.uiData.places
+                                            items: snapshot.data.uiData.places
                                         )
                                     );
                                     setState(() {
@@ -147,54 +148,54 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
                       Container(
                         padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
                         child: Row(
-                          children:[
-                            Expanded(
-                              flex:1,
-                              child: CustomDatePicker(
-                                value: snapshot.data.uiData?.filterData?.date,
-                                hint: "Дата",
-                                onChange: (value) {
-                                    setState((){
-                                  date = value;
-                                  snapshot.data.uiData.filterData.date = date;
-                                });
-                                }
+                            children:[
+                              Expanded(
+                                flex:1,
+                                child: CustomDatePicker(
+                                    value: snapshot.data.uiData?.filterData?.date,
+                                    hint: "Дата",
+                                    onChange: (value) {
+                                      setState((){
+                                        date = value;
+                                        snapshot.data.uiData.filterData.date = date;
+                                      });
+                                    }
+                                ),
                               ),
-                            ),
-                            SizedBox(width: 10,),
-                            Expanded(
-                              flex: 1,
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    FocusManager.instance.primaryFocus.unfocus();
-                                    final company = await showDialog(
-                                        context: context,
-                                        builder: (builderContext) => SearchLocationDialog(
-                                            items: snapshot.data.uiData.companies
-                                        )
-                                    );
-                                    setState(() {
-                                      snapshot.data.uiData.filterData.company = company;
-                                    });
-                                  },
-                                  child: Container(
-                                    height: 48,
-                                    padding: EdgeInsets.only(left: 15, right: 15),
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(snapshot.data.uiData?.filterData?.company == null ? 'Компания': snapshot.data.uiData.filterData.company,
-                                        style: TextStyle(
-                                            color: snapshot.data.uiData?.filterData?.company == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
-                                            fontSize: 16
-                                        )
+                              SizedBox(width: 10,),
+                              Expanded(
+                                  flex: 1,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      FocusManager.instance.primaryFocus.unfocus();
+                                      final company = await showDialog(
+                                          context: context,
+                                          builder: (builderContext) => SearchLocationDialog(
+                                              items: snapshot.data.uiData.companies
+                                          )
+                                      );
+                                      setState(() {
+                                        snapshot.data.uiData.filterData.company = company;
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 48,
+                                      padding: EdgeInsets.only(left: 15, right: 15),
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(snapshot.data.uiData?.filterData?.company == null ? 'Компания': snapshot.data.uiData.filterData.company,
+                                          style: TextStyle(
+                                              color: snapshot.data.uiData?.filterData?.company == null ? Color(0xFFDCDCDC) : Color(0xFF667689),
+                                              fontSize: 16
+                                          )
+                                      ),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(color: Color(0xFFEDEBF0), width: 1),
+                                          borderRadius: BorderRadius.circular(40)
+                                      ),
                                     ),
-                                    decoration: BoxDecoration(
-                                        border: Border.all(color: Color(0xFFEDEBF0), width: 1),
-                                        borderRadius: BorderRadius.circular(40)
-                                    ),
-                                  ),
-                                )
-                            )
-                          ]
+                                  )
+                              )
+                            ]
                         ),
                       ),
                       //Text('${snapshot.data.uiData?.filterData?.costStart ?? 'sss'} --- ${snapshot.data.uiData?.filterData?.costEnd ?? 'sss'} --- ${snapshot.data.uiData?.filterData?.to ?? 'sss'}'),
@@ -202,7 +203,7 @@ class ItineraryListScreenState extends State<ItineraryListScreen>{
                     ],
                   ),
                 ),
-                //ItineraryListFilter(),
+              //ItineraryListFilter(),
               Expanded(
                 child: ItineraryList(bloc: _bloc, snapshot: snapshot),
               )
@@ -242,7 +243,6 @@ class ItineraryListState extends State<ItineraryList>{
   void _onScroll() {
     if (!_isBottom)
       return;
-    print('ON SCROLL');
     //widget._bloc.loadMore();
   }
 
@@ -271,15 +271,14 @@ class ItineraryListState extends State<ItineraryList>{
     }
 
     itineraries = itineraries.where((element) =>
-      (state.uiData.filterData?.from == null || state.uiData.filterData.from == element.from) &&
-      (state.uiData.filterData?.to == null || state.uiData.filterData.to == element.to) &&
-      (state.uiData.filterData?.date == null || (state.uiData.filterData.date.day == element.date.day && state.uiData.filterData.date.month == element.date.month && state.uiData.filterData.date.year == element.date.year)) &&
-      (state.uiData.filterData?.company == null || element.transporter.contains(state.uiData.filterData.company))
+    (state.uiData.filterData?.from == null || state.uiData.filterData.from == element.from) &&
+        (state.uiData.filterData?.to == null || state.uiData.filterData.to == element.to) &&
+        (state.uiData.filterData?.date == null || (state.uiData.filterData.date.day == element.date.day && state.uiData.filterData.date.month == element.date.month && state.uiData.filterData.date.year == element.date.year)) &&
+        (state.uiData.filterData?.company == null || element.transporter.contains(state.uiData.filterData.company))
     ).toList();
 
     return RefreshIndicator(
         onRefresh: () async {
-          print('REFRESH');
           //await widget._bloc.updateUserData(context);
           widget._bloc.refresh = true;
           await widget._bloc.reload();
@@ -329,7 +328,7 @@ class ItineraryItem extends StatelessWidget{
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(item.from, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
-                        Text(getTime(item.start), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                        Text(DateTimeHelper.getTime(item.start), style: TextStyle(color: Color(0xFFB4B9BF)),)
                       ],
                     ),
                   ),
@@ -337,7 +336,7 @@ class ItineraryItem extends StatelessWidget{
                 Expanded(
                   flex: 1,
                   child: Container(
-                      //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+                    //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
                       child: Icon(Icons.arrow_forward_rounded, color: Color(0xFFB4B9BF),)),
                 ),
 
@@ -349,7 +348,7 @@ class ItineraryItem extends StatelessWidget{
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(item.to, style: TextStyle(color: Color(0xFF667689), fontSize: 18),),
-                          Text(getTime(item.finish), style: TextStyle(color: Color(0xFFB4B9BF)),)
+                          Text(DateTimeHelper.getTime(item.finish), style: TextStyle(color: Color(0xFFB4B9BF)),)
                         ],
                       ),
                     )
@@ -383,24 +382,24 @@ class ItineraryItem extends StatelessWidget{
                             ),
                             Container(
                                 width: 90,
-                              child: Row(
-                                children: [
-                                  Icon(Icons.timelapse, color: Color(0xFFB4B9BF),),
-                                  Text(
-                                    getDuration(item.start.difference(item.finish).inMinutes.abs()),
-                                    style: TextStyle(color: Color(0xFFB4B9BF)),
-                                  )
-                                ],
-                              )
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.timelapse, color: Color(0xFFB4B9BF),),
+                                    Text(
+                                      DateTimeHelper.getDuration(item.start.difference(item.finish).inMinutes.abs()),
+                                      style: TextStyle(color: Color(0xFFB4B9BF)),
+                                    )
+                                  ],
+                                )
                             )
                           ],
                         ),
                       ),
                       Row(
-                        children: [
-                          Icon(Icons.business_center, color: Color(0xFFB4B9BF)),
-                          Text('${item.transporter}', style: TextStyle(color: Color(0xFFB4B9BF)))
-                        ]
+                          children: [
+                            Icon(Icons.business_center, color: Color(0xFFB4B9BF)),
+                            Text('${item.transporter}', style: TextStyle(color: Color(0xFFB4B9BF)))
+                          ]
                       ),
                       Row(
                           children: [
@@ -435,7 +434,7 @@ class ItineraryItem extends StatelessWidget{
                           ),
                           child: Text('КУПИТЬ', style: TextStyle(color: Colors.white, fontSize: 18),),
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.green
+                              backgroundColor: Colors.green
                           ),
                         ),
                       )
@@ -451,11 +450,4 @@ class ItineraryItem extends StatelessWidget{
     );
   }
 
-  String getTime(DateTime date){
-    return (DateFormat('HH:mm').format(date));
-  }
-
-  String getDuration(int minutes){
-    return '${minutes ~/ 60} ч ${minutes % 60} м';
-  }
 }

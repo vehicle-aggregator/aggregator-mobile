@@ -31,16 +31,13 @@ class AuthModel {
     final body = {'email': email, 'password': password};
     final json = await _client.post(Endpoints.login, body);
     var u = await getUserProfile(json['ID']);
-    print(u);
     return setUser(u);
   }
 
   Future<User> register(User user, String password) async {
     final body = user.toJson(password: password);
-    print(body);
     final json = await _client.post(Endpoints.register, body);
-    print(json);
-    
+
     return await getUserProfile(json['Uid']);
   }
 

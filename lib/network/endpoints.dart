@@ -16,5 +16,6 @@ class Endpoints {
   static const String history = "casual/history";
   static const String balance = "casual/balance";
   static const String passenger = "passenger/create";
+  static const String feedback = "trip/feedback";
 
 }
